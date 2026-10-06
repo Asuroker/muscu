@@ -1,7 +1,8 @@
 import { etat, maj, esc, uid, jour, heure, dateLongue, dateDepuisJour, duree, kg, salle } from '../store.js';
 import { entete, aller } from '../nav.js';
-import { GROUPES, nomGroupe, exo, image, colonnes } from '../exercices.js';
+import { GROUPES, nomGroupe, exo, image, colonnes, texteSerie } from '../exercices.js';
 import { calculerXpSeance, ajouterXp } from '../xp.js';
+import { caloriesSeance, totalCalories, fmtKcal } from '../calories.js';
 import { ICONES, ouvrirFeuille, confirmer, toast } from '../ui.js';
 import { celebrer } from './recompenses.js';
 
@@ -44,9 +45,10 @@ export function afficher(el) {
         return `<button class="${cls}" data-jour="${k}">${d.getDate()}<span class="cal-points">${'<i></i>'.repeat(Math.min(n, 3))}</span></button>`;
       }).join('')}
     </div>
-    <div class="grille-2" style="margin-top:12px">
-      <div class="stat"><div class="val">${duMois.length}</div><div class="lib">Séances ce mois</div></div>
-      <div class="stat"><div class="val">${minutesMois ? duree(minutesMois) : '0'}</div><div class="lib">Temps ce mois</div></div>
+    <div class="grille-3" style="margin-top:12px">
+      <div class="stat"><div class="val">${duMois.length}</div><div class="lib">Séances</div></div>
+      <div class="stat"><div class="val">${minutesMois ? duree(minutesMois) : '0'}</div><div class="lib">Temps</div></div>
+      <div class="stat"><div class="val">${duMois.length ? Math.round(totalCalories(duMois)).toLocaleString('fr-FR') : '0'}</div><div class="lib">kcal ce mois</div></div>
     </div>
 
     <h2>${dateLongue(choisi)}</h2>
@@ -75,7 +77,7 @@ function ligneSeance(s) {
     <div class="vignette vide" style="font-weight:800;font-size:13px;color:var(--accent)">${esc(s.debut)}</div>
     <div class="flex1">
       <div class="titre">${(s.types || []).map(nomGroupe).join(' · ') || 'Séance'}</div>
-      <div class="sous">${duree(s.duree)}${sa ? ' · ' + esc(sa.nom) : ''}${nbEx ? ` · ${nbEx} exercice${nbEx > 1 ? 's' : ''}` : ''}</div>
+      <div class="sous">${duree(s.duree)} · 🔥 ${fmtKcal(caloriesSeance(s).total)}${sa ? ' · ' + esc(sa.nom) : ''}${nbEx ? ` · ${nbEx} exercice${nbEx > 1 ? 's' : ''}` : ''}</div>
     </div>
     ${ICONES.chevron}
   </div>`;
@@ -92,6 +94,7 @@ export function afficherSeance(el, [id]) {
   if (!s) { entete('Séance'); el.innerHTML = '<p class="discret">Séance introuvable.</p>'; return; }
   entete('Séance', `<button class="btn btn-icone" id="modif" aria-label="Modifier">${ICONES.crayon}</button>`);
   const sa = salle(s.salleId);
+  const kcal = caloriesSeance(s);
   const totalSeries = (s.exercices || []).reduce((t, e) => t + e.series.filter((x) => x.faite).length, 0);
   const volume = (s.exercices || []).reduce((t, e) => t + e.series.filter((x) => x.faite && colonnes(exo(e.exId)).mode === 'muscu').reduce((u, x) => u + x.reps * (x.kg || 0), 0), 0);
 
@@ -106,11 +109,15 @@ export function afficherSeance(el, [id]) {
       </div>
       ${s.note ? `<p style="margin-top:10px">${esc(s.note)}</p>` : ''}
     </div>
-    ${totalSeries ? `<div class="grille-2" style="margin-top:10px">
-      <div class="stat"><div class="val">${totalSeries}</div><div class="lib">Séries</div></div>
-      <div class="stat"><div class="val">${volume ? Math.round(volume).toLocaleString('fr-FR') + ' kg' : '–'}</div><div class="lib">Volume soulevé</div></div>
-    </div>` : ''}
-    ${(s.exercices || []).length ? `<h2>Exercices</h2>${s.exercices.map((e) => carteExercice(e)).join('')}` : ''}
+    <div class="grille-${totalSeries ? 3 : 1}" style="margin-top:10px">
+      <div class="stat"><div class="val">🔥 ${Math.round(kcal.total).toLocaleString('fr-FR')}</div><div class="lib">kcal dépensées</div></div>
+      ${totalSeries ? `<div class="stat"><div class="val">${totalSeries}</div><div class="lib">Séries</div></div>
+      <div class="stat"><div class="val">${volume ? Math.round(volume).toLocaleString('fr-FR') + ' kg' : '–'}</div><div class="lib">Volume</div></div>` : ''}
+    </div>
+    <p class="tres-discret" style="margin-top:6px">${kcal.estime
+      ? 'Calories estimées pour 75 kg : <a href="#/poids" style="color:var(--accent)">ajoute ta pesée</a> pour un calcul précis.'
+      : `Calories estimées pour ${String(kcal.poids).replace('.', ',')} kg (méthode MET).`}</p>
+    ${(s.exercices || []).length ? `<h2>Exercices</h2>${s.exercices.map((e, i) => carteExercice(e, kcal.parExercice[i])).join('')}` : ''}
     <button class="btn btn-plein btn-danger" id="suppr" style="margin-top:20px">${ICONES.poubelle} Supprimer la séance</button>
   `;
   el.querySelectorAll('[data-aller]').forEach((b) => (b.onclick = () => aller(b.dataset.aller)));
@@ -126,7 +133,7 @@ export function afficherSeance(el, [id]) {
   };
 }
 
-function carteExercice(e) {
+function carteExercice(e, kcal) {
   const ex = exo(e.exId);
   const col = colonnes(ex);
   const faites = e.series.filter((x) => x.faite);
@@ -134,8 +141,8 @@ function carteExercice(e) {
     <div class="ligne">
       ${image(ex) ? `<img class="vignette" src="${image(ex)}" alt="" loading="lazy">` : '<div class="vignette vide"></div>'}
       <div class="flex1">
-        <div style="font-weight:700">${esc(ex?.n || e.exId)}</div>
-        <div class="discret">${faites.length ? faites.map((x) => col.kg && x.kg ? `${x.reps}×${String(x.kg).replace('.', ',')}` : `${x.reps} ${col.reps.toLowerCase()}`).join(' · ') : 'Aucune série validée'}</div>
+        <div class="ligne-entre"><div style="font-weight:700">${esc(ex?.n || e.exId)}</div>${kcal ? `<span class="etiquette accent" style="white-space:nowrap">${fmtKcal(kcal)}</span>` : ''}</div>
+        <div class="discret">${faites.length ? faites.map((x) => texteSerie(ex, x)).join(' · ') : 'Aucune série validée'}</div>
       </div>
     </div>
   </div>`;
@@ -199,7 +206,7 @@ export function ajouterSeanceManuelle(date, existante = null) {
         gain = ajouterXp(e, calcul.total, 'Séance', d, { seanceId: seance.id });
       });
       fermer();
-      celebrer({ ...calcul, ...gain });
+      celebrer({ ...calcul, ...gain, kcal: caloriesSeance(seance) });
     };
   });
 }

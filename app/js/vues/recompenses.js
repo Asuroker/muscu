@@ -3,6 +3,7 @@ import { entete } from '../nav.js';
 import { niveauActuel, recompensePourNiveau, titreNiveau } from '../xp.js';
 import { ICONES, ouvrirFeuille, confirmer, toast } from '../ui.js';
 import { carteNiveau } from './accueil.js';
+import { fmtKcal } from '../calories.js';
 
 const fmtDate = (iso) => dateCourte(jour(new Date(iso)));
 
@@ -95,7 +96,7 @@ function editerRegle(i) {
 }
 
 /** Écran de fin : XP gagnée, niveaux et bons. */
-export function celebrer({ lignes = [], total = 0, niveaux = [], bons = [] }) {
+export function celebrer({ lignes = [], total = 0, niveaux = [], bons = [], kcal = null }) {
   ouvrirFeuille((el, fermer) => {
     const n = niveauActuel();
     el.innerHTML = `
@@ -104,6 +105,8 @@ export function celebrer({ lignes = [], total = 0, niveaux = [], bons = [] }) {
         <div style="font-size:24px;font-weight:850;margin-top:4px">${niveaux.length ? `Niveau ${niveaux[niveaux.length - 1]} atteint !` : 'Bien joué !'}</div>
         <div class="discret">${niveaux.length ? esc(titreNiveau(niveaux[niveaux.length - 1])) : `Niveau ${n.niveau} · encore ${n.besoin - n.xpDansNiveau} XP`}</div>
       </div>
+      ${kcal ? `<div class="stat centre" style="margin-top:10px"><div class="val">🔥 ${fmtKcal(kcal.total)}</div>
+        <div class="lib">dépensées${kcal.estime ? ' · estimation pour 75 kg, ajoute une pesée' : ` · pour ${String(kcal.poids).replace('.', ',')} kg`}</div></div>` : ''}
       <div class="carte" style="margin-top:10px">
         <table class="horaires">${lignes.map((l) => `<tr><td>${esc(l.lib)}</td><td>+${l.xp} XP</td></tr>`).join('')}
           <tr><td><strong>Total</strong></td><td><strong style="color:var(--or)">+${total} XP</strong></td></tr></table>

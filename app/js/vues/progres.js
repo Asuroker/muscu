@@ -2,11 +2,12 @@ import {
   etat, maj, esc, jour, kg, dateCourte, dateLongue, duree, historiqueExercice, remplacerEtat, reinitialiser,
 } from '../store.js';
 import { entete, aller } from '../nav.js';
-import { exo, image, colonnes } from '../exercices.js';
+import { exo, image, colonnes, texteSerie } from '../exercices.js';
 import { ajouterXp } from '../xp.js';
 import { ICONES, ouvrirFeuille, confirmer, toast, graphe } from '../ui.js';
 import { carteNiveau } from './accueil.js';
 import { celebrer } from './recompenses.js';
+import { totalCalories } from '../calories.js';
 
 export function afficher(el) {
   entete('Progrès');
@@ -19,9 +20,10 @@ export function afficher(el) {
 
   el.innerHTML = `
     ${carteNiveau()}
-    <div class="grille-3" style="margin-top:10px">
+    <div class="grille-2" style="margin-top:10px">
       <div class="stat"><div class="val">${nb}</div><div class="lib">Séances</div></div>
       <div class="stat"><div class="val">${minutes ? duree(minutes) : '0'}</div><div class="lib">Au total</div></div>
+      <div class="stat"><div class="val">${Math.round(totalCalories(etat.seances)).toLocaleString('fr-FR')}</div><div class="lib">kcal</div></div>
       <div class="stat"><div class="val">${volume >= 1000 ? (Math.round(volume / 100) / 10).toLocaleString('fr-FR') + ' t' : Math.round(volume) + ' kg'}</div><div class="lib">Soulevés</div></div>
     </div>
     <div class="liste" style="margin-top:16px">
@@ -128,13 +130,15 @@ export function afficherCharges(el) {
     return;
   }
   el.innerHTML = `<div class="liste">${liste.map(({ ex, h }) => {
-    const rec = Math.max(...h.map((x) => x.max));
+    const muscu = colonnes(ex).mode === 'muscu';
+    const rec = muscu ? Math.max(...h.map((x) => x.max)) : 0;
     const der = h[h.length - 1];
-    const prog = h.length > 1 ? der.max - h[0].max : 0;
+    const prog = muscu && h.length > 1 ? der.max - h[0].max : 0;
+    const cumul = muscu ? '' : texteCumul(ex, h) + ' · ';
     return `<a class="item" href="#/charge/${encodeURIComponent(ex.id)}">
       ${image(ex) ? `<img class="vignette" src="${image(ex)}" alt="" loading="lazy">` : '<div class="vignette vide"></div>'}
       <div class="flex1"><div class="titre">${esc(ex.n)}</div>
-        <div class="sous">${rec ? 'Record ' + kg(rec) + ' · ' : ''}${h.length} séance${h.length > 1 ? 's' : ''} · ${dateCourte(der.date)}</div></div>
+        <div class="sous">${cumul}${rec ? 'Record ' + kg(rec) + ' · ' : ''}${h.length} séance${h.length > 1 ? 's' : ''} · ${dateCourte(der.date)}</div></div>
       ${prog > 0 ? `<span class="etiquette vert">+${kg(prog)}</span>` : ''}
     </a>`;
   }).join('')}</div>`;
@@ -146,24 +150,39 @@ export function afficherCharge(el, [id]) {
   entete(ex.n);
   const h = historiqueExercice(id);
   const col = colonnes(ex);
-  const rec = h.length ? Math.max(...h.map((x) => x.max)) : 0;
-  const unRM = h.length ? Math.max(...h.map((x) => x.unRM)) : 0;
+  const muscu = col.mode === 'muscu';
+  const rec = muscu && h.length ? Math.max(...h.map((x) => x.max)) : 0;
+  const unRM = muscu && h.length ? Math.max(...h.map((x) => x.unRM)) : 0;
+  const minutes = (x) => x.series.reduce((t, s) => t + (s.reps || 0), 0) / (col.mode === 'etirement' ? 60 : 1);
+  const km = (x) => x.series.reduce((t, s) => t + (s.kg || 0), 0);
+  const kmTotal = h.reduce((t, x) => t + km(x), 0);
   el.innerHTML = `
-    <div class="grille-2">
+    ${muscu ? `<div class="grille-2">
       <div class="stat"><div class="val">${rec ? kg(rec) : '–'}</div><div class="lib">Record</div></div>
       <div class="stat"><div class="val">${unRM ? kg(Math.round(unRM)) : '–'}</div><div class="lib">1RM estimé</div></div>
-    </div>
-    ${col.kg && h.length > 1 ? `<h2>Charge max par séance</h2><div class="carte">${graphe(h.map((x) => ({ date: x.date, y: x.max })), { unite: 'kg' })}</div>
+    </div>` : `<div class="grille-2">
+      <div class="stat"><div class="val">${duree(h.reduce((t, x) => t + minutes(x), 0))}</div><div class="lib">Temps total</div></div>
+      <div class="stat"><div class="val">${col.kg && kmTotal ? String(Math.round(kmTotal * 10) / 10).replace('.', ',') + ' km' : h.length}</div><div class="lib">${col.kg && kmTotal ? 'Distance totale' : 'Séances'}</div></div>
+    </div>`}
+    ${!muscu && h.length > 1 ? `<h2>${col.kg && kmTotal ? 'Distance' : 'Durée'} par séance</h2><div class="carte">${graphe(h.map((x) => ({ date: x.date, y: col.kg && kmTotal ? km(x) : minutes(x) })), { unite: col.kg && kmTotal ? 'km' : 'min' })}</div>` : ''}
+    ${muscu && h.length > 1 ? `<h2>Charge max par séance</h2><div class="carte">${graphe(h.map((x) => ({ date: x.date, y: x.max })), { unite: 'kg' })}</div>
       <h2>Volume par séance</h2><div class="carte">${graphe(h.map((x) => ({ date: x.date, y: x.volume })), { unite: 'kg' })}</div>` : ''}
     <h2>Historique</h2>
     ${h.length ? `<div class="liste">${[...h].reverse().map((x) => `<a class="item" href="#/seance-detail/${x.seanceId}">
         <div class="flex1"><div class="titre">${dateLongue(x.date)}</div>
-        <div class="sous">${x.series.map((s) => col.kg && s.kg ? `${s.reps} × ${String(s.kg).replace('.', ',')} kg` : `${s.reps} ${col.reps.toLowerCase()}`).join(' · ')}</div></div>
+        <div class="sous">${x.series.map((s) => texteSerie(ex, s)).join(' · ')}</div></div>
         ${x.max === rec && rec ? '<span class="etiquette or">🏆</span>' : ''}
       </a>`).join('')}</div>` : '<p class="discret">Aucune donnée.</p>'}
     <button class="btn btn-plein" style="margin-top:14px" data-aller="exercice/${encodeURIComponent(ex.id)}">Voir la fiche de l’exercice</button>
   `;
   el.querySelector('[data-aller]').onclick = (e) => aller(e.currentTarget.dataset.aller);
+}
+
+function texteCumul(ex, h) {
+  const col = colonnes(ex);
+  const min = h.reduce((t, x) => t + x.series.reduce((u, s) => u + (s.reps || 0), 0), 0) / (col.mode === 'etirement' ? 60 : 1);
+  const km = h.reduce((t, x) => t + x.series.reduce((u, s) => u + (s.kg || 0), 0), 0);
+  return duree(min) + (km ? ` · ${String(Math.round(km * 10) / 10).replace('.', ',')} km` : '');
 }
 
 // ---------- Réglages ----------
