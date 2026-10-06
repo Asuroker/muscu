@@ -6,6 +6,7 @@ import { caloriesSeance, totalCalories, fmtKcal } from '../calories.js';
 import { ICONES, ouvrirFeuille, confirmer, toast } from '../ui.js';
 import { celebrer } from './recompenses.js';
 import { demarrerModele, planifierPour } from './seance.js';
+import { htmlChoixCategories, brancherChoixCategories } from './categories.js';
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
 let mois = null;      // Date du 1er du mois affiché
@@ -186,16 +187,15 @@ export function ajouterSeanceManuelle(date, existante = null) {
         </label>
         ${etat.salles.length ? '' : '<button class="btn-lien" id="f-chercher" style="align-self:flex-start">+ Ajouter ma salle de sport</button>'}
         <div class="champ">Ce que j’ai travaillé
-          <div class="puces" style="margin-top:4px">${GROUPES.map((g) => `<button class="puce ${types.has(g.id) ? 'active' : ''}" data-type="${g.id}">${g.emoji} ${g.nom}</button>`).join('')}</div>
+          <div id="f-cat" style="margin-top:4px">${htmlChoixCategories(types)}</div>
         </div>
         <label class="champ">Note<textarea id="f-note" placeholder="Ressenti, forme du jour…">${esc(existante?.note || '')}</textarea></label>
         <button class="btn btn-principal btn-plein" id="f-ok">${existante ? 'Enregistrer' : 'Ajouter la séance'}</button>
       </div>`;
     el.querySelectorAll('[data-duree]').forEach((b) => (b.onclick = () => (el.querySelector('#f-duree').value = b.dataset.duree)));
-    el.querySelectorAll('[data-type]').forEach((b) => (b.onclick = () => {
-      types.has(b.dataset.type) ? types.delete(b.dataset.type) : types.add(b.dataset.type);
-      b.classList.toggle('active');
-    }));
+    const zoneCat = el.querySelector('#f-cat');
+    const majCat = () => { zoneCat.innerHTML = htmlChoixCategories(types); brancherChoixCategories(zoneCat, types, majCat); };
+    brancherChoixCategories(zoneCat, types, majCat);
     const ch = el.querySelector('#f-chercher');
     if (ch) ch.onclick = () => { fermer(); aller('salles'); };
     el.querySelector('#f-ok').onclick = () => {

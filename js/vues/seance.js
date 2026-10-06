@@ -1,13 +1,14 @@
 import { etat, maj, esc, uid, jour, heure, duree, salle, dernieresSeries, dateCourte, dateDepuisJour } from '../store.js';
 import { entete, aller, chrono } from '../nav.js';
 import {
-  GROUPES, MODELES, FORMATS, exo, image, colonnes, texteSerie, genererSeance, candidats, famille, seriesParDefaut, nbExercicesPour, enSecondes, nomGroupe,
+  GROUPES, MODELES, FORMATS, categorieMuscle, categorieZone, exo, image, colonnes, texteSerie, genererSeance, candidats, famille, seriesParDefaut, nbExercicesPour, enSecondes, nomGroupe,
 } from '../exercices.js';
 import { calculerXpSeance, ajouterXp } from '../xp.js';
 import { caloriesSeance } from '../calories.js';
 import { verifierCharges } from '../objectifs.js';
 import { ICONES, ouvrirFeuille, confirmer, toast, vibrer } from '../ui.js';
 import { choisirExercice } from './bibliotheque.js';
+import { htmlChoixCategories, brancherChoixCategories } from './categories.js';
 import { celebrer } from './recompenses.js';
 
 // Brouillon de séance (avant de démarrer), gardé tant que l'app est ouverte.
@@ -79,7 +80,7 @@ function afficherPreparation(el) {
     ${b.datePrevue ? `<div class="carte" style="margin-top:12px;border-color:var(--accent)">📅 Tu prépares une séance pour <strong>${quand(b.datePrevue)}</strong>. Compose-la puis touche « Enregistrer pour plus tard ».</div>` : ''}
 
     <h2>Que veux-tu travailler ?</h2>
-    <div class="puces">${GROUPES.map((g) => `<button class="puce ${b.types.has(g.id) ? 'active' : ''}" data-type="${g.id}">${g.emoji} ${g.nom}</button>`).join('')}</div>
+    <div id="choix-cat">${htmlChoixCategories(b.types)}</div>
     <p class="tres-discret" style="margin-top:10px">Raccourcis :</p>
     <div class="puces defile">${MODELES.map((m, i) => `<button class="puce" data-modele="${i}">${m.nom}</button>`).join('')}</div>
 
@@ -115,10 +116,7 @@ function afficherPreparation(el) {
     <button class="btn btn-plein" id="libre">${ICONES.horloge} Séance libre (je choisis au fur et à mesure)</button>
   `;
 
-  el.querySelectorAll('[data-type]').forEach((x) => (x.onclick = () => {
-    b.types.has(x.dataset.type) ? b.types.delete(x.dataset.type) : b.types.add(x.dataset.type);
-    afficherPreparation(el);
-  }));
+  brancherChoixCategories(el.querySelector('#choix-cat'), b.types, () => afficherPreparation(el));
   el.querySelectorAll('[data-modele]').forEach((x) => (x.onclick = () => {
     b.types = new Set(MODELES[x.dataset.modele].groupes);
     b.proposition = genererSeance([...b.types], b.minutes, b.materiel, schemaActuel());
@@ -206,16 +204,16 @@ function dessinerProposition(zone, el) {
 }
 
 function nomMuscle(ex) {
-  const g = GROUPES.find((g) => g.categorie === ex.c) || GROUPES.find((g) => g.muscles?.includes(ex.m[0]));
-  return g ? g.nom : '';
+  return categorieMuscle(ex)?.nom || '';
 }
 
 /** Un autre exercice qui travaille le même muscle principal (autre mouvement si possible). */
 function remplacant(ex, exclus) {
-  const g = GROUPES.find((g) => g.categorie === ex.c) || GROUPES.find((g) => g.muscles?.includes(ex.m[0]));
+  const g = categorieMuscle(ex);
   if (!g) return null;
   let c = candidats(g.id, brouillon.materiel).filter((x) => !exclus.includes(x.id) && x.m[0] === ex.m[0]);
   if (!c.length) c = candidats(g.id, brouillon.materiel).filter((x) => !exclus.includes(x.id));
+  if (!c.length && categorieZone(ex)) c = candidats(categorieZone(ex).id, brouillon.materiel).filter((x) => !exclus.includes(x.id));
   const autresFamilles = c.filter((x) => famille(x) !== famille(ex));
   const pool = autresFamilles.length ? autresFamilles : c;
   return pool[Math.floor(Math.random() * pool.length)] || null;
@@ -571,7 +569,7 @@ function menuExercice(i) {
       if (a === 'remplacer') {
         return choisirExercice((nv) => maj((e) => {
           e.enCours.exercices[i] = { exId: nv.id, series: prerempli({ exId: nv.id, series: seriesParDefaut(nv, 15, schemaActuel()) }) };
-        }), { groupe: GROUPES.find((g) => g.muscles?.includes(ex.m[0]) || g.categorie === ex.c)?.id });
+        }), { groupe: categorieMuscle(ex)?.id || '' });
       }
       maj((e) => {
         const l = e.enCours.exercices;
@@ -632,7 +630,7 @@ function deduireTypes(exercices) {
   const t = new Set();
   for (const e of exercices) {
     const ex = exo(e.exId);
-    const g = GROUPES.find((g) => g.categorie === ex?.c) || GROUPES.find((g) => g.muscles?.includes(ex?.m[0]));
+    const g = categorieZone(ex);
     if (g) t.add(g.id);
   }
   return [...t];

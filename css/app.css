@@ -381,3 +381,7 @@ body.en-bienvenue { overflow: hidden; }
 .mg-boutons .btn { min-width: 130px; background: rgba(255,255,255,.1); border-color: transparent; color: #fff; }
 .mg-stop { width: min(100%, 360px); }
 .cal-points i.prevu { background: transparent; border: 1.5px solid var(--accent); width: 6px; height: 6px; }
+
+/* Catégories musculaires : une ligne par groupe */
+.ligne-cat { margin-top: 6px; }
+.ligne-cat > span { display: block; margin: 0 2px 2px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; font-size: 11px; }

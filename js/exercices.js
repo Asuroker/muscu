@@ -23,25 +23,102 @@ export const CATEGORIES = {
 export const NIVEAUX = { beginner: 'Débutant', intermediate: 'Intermédiaire', expert: 'Expert' };
 
 /** Groupes proposés pour composer une séance. */
+// Catégories de muscles, sur deux niveaux :
+//  - zone : grand groupe (Bras, Dos, Jambes…) ; `enfants` = ses muscles précis ;
+//  - parent : muscle précis rattaché à une zone.
+// Pecs, Épaules et Abdos sont à la fois une zone et un muscle (un seul muscle dedans).
+// Les identifiants historiques (pecs, dos, biceps, fessiers…) sont conservés pour les séances déjà enregistrées.
 export const GROUPES = [
-  { id: 'pecs', nom: 'Pecs', emoji: '🦍', muscles: ['chest'] },
-  { id: 'dos', nom: 'Dos', emoji: '🦅', muscles: ['lats', 'middle back', 'lower back', 'traps'] },
-  { id: 'epaules', nom: 'Épaules', emoji: '🏋️', muscles: ['shoulders'] },
-  { id: 'biceps', nom: 'Biceps', emoji: '💪', muscles: ['biceps'] },
-  { id: 'triceps', nom: 'Triceps', emoji: '🔱', muscles: ['triceps'] },
-  { id: 'jambes', nom: 'Jambes', emoji: '🦵', muscles: ['quadriceps', 'hamstrings', 'glutes', 'calves', 'adductors', 'abductors'] },
-  { id: 'fessiers', nom: 'Fessiers', emoji: '🍑', muscles: ['glutes', 'abductors', 'hamstrings'] },
-  { id: 'abdos', nom: 'Abdos', emoji: '🍫', muscles: ['abdominals'] },
-  { id: 'avantbras', nom: 'Avant-bras', emoji: '✊', muscles: ['forearms'] },
-  { id: 'cardio', nom: 'Cardio', emoji: '❤️‍🔥', categorie: 'cardio' },
-  { id: 'etirements', nom: 'Étirements', emoji: '🧘', categorie: 'stretching' },
+  { id: 'bras', nom: 'Bras', emoji: '💪', zone: true, muscles: ['biceps', 'triceps', 'forearms'] },
+  { id: 'dos', nom: 'Dos', emoji: '🦅', zone: true, muscles: ['lats', 'middle back', 'lower back', 'traps'] },
+  { id: 'jambes', nom: 'Jambes', emoji: '🦵', zone: true, muscles: ['quadriceps', 'hamstrings', 'glutes', 'calves', 'adductors', 'abductors'] },
+  { id: 'pecs', nom: 'Pecs', emoji: '🦍', zone: true, muscles: ['chest'] },
+  { id: 'epaules', nom: 'Épaules', emoji: '🏋️', zone: true, muscles: ['shoulders'] },
+  { id: 'abdos', nom: 'Abdos', emoji: '🍫', zone: true, muscles: ['abdominals'] },
+  { id: 'cardio', nom: 'Cardio', emoji: '❤️‍🔥', zone: true, categorie: 'cardio' },
+  { id: 'etirements', nom: 'Étirements', emoji: '🧘', zone: true, categorie: 'stretching' },
+
+  { id: 'biceps', nom: 'Biceps', emoji: '💪', parent: 'bras', muscles: ['biceps'] },
+  { id: 'triceps', nom: 'Triceps', emoji: '🔱', parent: 'bras', muscles: ['triceps'] },
+  { id: 'avantbras', nom: 'Avant-bras', emoji: '✊', parent: 'bras', muscles: ['forearms'] },
+
+  { id: 'grand-dorsal', nom: 'Grand dorsal', emoji: '🏊', parent: 'dos', muscles: ['lats'] },
+  { id: 'milieu-dos', nom: 'Milieu du dos', emoji: '🔙', parent: 'dos', muscles: ['middle back'] },
+  { id: 'lombaires', nom: 'Lombaires', emoji: '🧱', parent: 'dos', muscles: ['lower back'] },
+  { id: 'trapezes', nom: 'Trapèzes', emoji: '⛰️', parent: 'dos', muscles: ['traps'] },
+
+  { id: 'quadriceps', nom: 'Quadriceps', emoji: '🦵', parent: 'jambes', muscles: ['quadriceps'] },
+  { id: 'ischios', nom: 'Ischio-jambiers', emoji: '🦿', parent: 'jambes', muscles: ['hamstrings'] },
+  { id: 'fessiers', nom: 'Fessiers', emoji: '🍑', parent: 'jambes', muscles: ['glutes'] },
+  { id: 'mollets', nom: 'Mollets', emoji: '🥾', parent: 'jambes', muscles: ['calves'] },
+  { id: 'adducteurs', nom: 'Adducteurs', emoji: '↔️', parent: 'jambes', muscles: ['adductors'] },
+  { id: 'abducteurs', nom: 'Abducteurs', emoji: '↕️', parent: 'jambes', muscles: ['abductors'] },
+
+  { id: 'cou', nom: 'Cou', emoji: '🦒', muscles: ['neck'] },
 ];
 
+export const ZONES = GROUPES.filter((g) => g.zone);
+export const enfantsDe = (zoneId) => GROUPES.filter((g) => g.parent === zoneId);
+/** Muscles précis sans zone (affichés dans « Autres »). */
+export const MUSCLES_SEULS = GROUPES.filter((g) => !g.zone && !g.parent);
+
+/** Catégorie la plus précise d'un exercice (muscle) : Triceps, Grand dorsal, Pecs, Cardio… */
+export function categorieMuscle(ex) {
+  if (!ex) return null;
+  const parCat = GROUPES.find((g) => g.categorie === ex.c);
+  if (parCat) return parCat;
+  const m = ex.m[0];
+  return GROUPES.find((g) => g.muscles?.includes(m) && !enfantsDe(g.id).length) || null;
+}
+
+/** Grand groupe d'un exercice : Bras, Dos, Jambes, Pecs… */
+export function categorieZone(ex) {
+  const c = categorieMuscle(ex);
+  if (!c) return null;
+  return c.parent ? GROUPES.find((g) => g.id === c.parent) : c;
+}
+
+/**
+ * Sélection de catégories (Set d'identifiants) : un groupe coché inclut ses muscles.
+ * Toucher un muscle d'un groupe coché le retire du groupe ; cocher tous les muscles revient au groupe.
+ */
+export function estChoisi(sel, id) {
+  const g = GROUPES.find((x) => x.id === id);
+  return sel.has(id) || !!(g?.parent && sel.has(g.parent));
+}
+
+export function basculerCategorie(sel, id) {
+  const g = GROUPES.find((x) => x.id === id);
+  if (!g) return;
+  const enfants = enfantsDe(id);
+  if (enfants.length) {
+    if (sel.has(id)) sel.delete(id);
+    else { sel.add(id); enfants.forEach((e) => sel.delete(e.id)); }
+    return;
+  }
+  if (g.parent) {
+    const freres = enfantsDe(g.parent);
+    if (sel.has(g.parent)) {
+      sel.delete(g.parent);
+      freres.filter((f) => f.id !== id).forEach((f) => sel.add(f.id));
+    } else if (sel.has(id)) {
+      sel.delete(id);
+    } else {
+      sel.add(id);
+      if (freres.every((f) => sel.has(f.id))) { freres.forEach((f) => sel.delete(f.id)); sel.add(g.parent); }
+    }
+    return;
+  }
+  sel.has(id) ? sel.delete(id) : sel.add(id);
+}
+
 export const MODELES = [
-  { nom: 'Haut du corps', groupes: ['pecs', 'dos', 'epaules', 'biceps', 'triceps'] },
-  { nom: 'Bas du corps', groupes: ['jambes', 'fessiers', 'abdos'] },
+  { nom: 'Haut du corps', groupes: ['pecs', 'dos', 'epaules', 'bras'] },
+  { nom: 'Bas du corps', groupes: ['jambes', 'abdos'] },
   { nom: 'Push (pousser)', groupes: ['pecs', 'epaules', 'triceps'] },
   { nom: 'Pull (tirer)', groupes: ['dos', 'biceps', 'avantbras'] },
+  { nom: 'Bras complets', groupes: ['bras'] },
+  { nom: 'Fessiers', groupes: ['fessiers', 'ischios', 'abducteurs'] },
   { nom: 'Full body', groupes: ['pecs', 'dos', 'jambes', 'epaules', 'abdos'] },
 ];
 
@@ -170,7 +247,7 @@ export const nbExercicesPour = (min) => Math.max(2, Math.min(10, Math.round(min 
 export function genererSeance(groupes, minutes, materiel = 'tout', schema = null) {
   const n = nbExercicesPour(minutes);
   const avecCardio = groupes.includes('cardio');
-  const autres = groupes.filter((g) => g !== 'cardio');
+  const autres = groupes.filter((g) => g !== 'cardio' && muscleGroupe(g)); // ignore les catégories inconnues
   const choisis = [];
   const famillesPrises = new Set();
 
@@ -178,7 +255,10 @@ export function genererSeance(groupes, minutes, materiel = 'tout', schema = null
     let c = candidats(groupeId, materiel).filter((ex) => !choisis.includes(ex) && !famillesPrises.has(famille(ex)));
     if (sousMuscle) {
       const cible = c.filter((ex) => ex.m[0] === sousMuscle);
+      // Ce muscle n'a plus de nouveau mouvement (ex. biceps = que des curls) : autre variante du même muscle.
+      const memeMuscle = candidats(groupeId, materiel).filter((ex) => !choisis.includes(ex) && ex.m[0] === sousMuscle);
       if (cible.length) c = cible;
+      else if (memeMuscle.length) c = memeMuscle;
     }
     // Plus de nouveau mouvement parmi les essentiels : on prend une autre variante courante
     // (ex. biceps = que des curls) plutôt qu'un exercice rare.
