@@ -42,6 +42,7 @@ export function afficher(el) {
   const dernierPoids = poids[poids.length - 1];
 
   el.innerHTML = `
+    ${etat.profil?.prenom ? `<div style="font-size:20px;font-weight:750;margin:0 2px 10px">Salut ${esc(etat.profil.prenom)} 👋</div>` : ''}
     ${bandeauSauvegarde()}
     ${carteNiveau()}
 

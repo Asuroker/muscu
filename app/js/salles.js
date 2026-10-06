@@ -56,13 +56,16 @@ export async function chercherSalles({ lat, lon, rayon = 8000, nom = '' }) {
     nwr["leisure"="fitness_centre"](around:${rayon},${lat},${lon});
     nwr["leisure"="sports_centre"]["sport"~"fitness|bodybuilding|weightlifting"](around:${rayon},${lat},${lon});
   );out center tags;`;
+  // Les serveurs Overpass sont parfois saturés : on essaie chacun, deux tours au maximum.
   let donnees = null, erreur = null;
-  for (const url of OVERPASS) {
-    try {
-      donnees = await avecDelai(url, { method: 'POST', body: 'data=' + encodeURIComponent(q), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
-      break;
-    } catch (e) {
-      erreur = e;
+  for (let tour = 0; tour < 2 && !donnees; tour++) {
+    for (const url of OVERPASS) {
+      try {
+        donnees = await avecDelai(url, { method: 'POST', body: 'data=' + encodeURIComponent(q), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }, 20000);
+        break;
+      } catch (e) {
+        erreur = e;
+      }
     }
   }
   if (!donnees) throw erreur || new Error('Service indisponible');
