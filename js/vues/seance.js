@@ -1,9 +1,10 @@
 import { etat, maj, esc, uid, jour, heure, duree, salle, dernieresSeries } from '../store.js';
 import { entete, aller, chrono } from '../nav.js';
 import {
-  GROUPES, MODELES, exo, image, colonnes, genererSeance, candidats, famille, seriesParDefaut, nbExercicesPour,
+  GROUPES, MODELES, exo, image, colonnes, texteSerie, genererSeance, candidats, famille, seriesParDefaut, nbExercicesPour,
 } from '../exercices.js';
 import { calculerXpSeance, ajouterXp } from '../xp.js';
+import { caloriesSeance } from '../calories.js';
 import { ICONES, ouvrirFeuille, confirmer, toast, vibrer } from '../ui.js';
 import { choisirExercice } from './bibliotheque.js';
 import { celebrer } from './recompenses.js';
@@ -112,7 +113,7 @@ function dessinerProposition(zone, el) {
 }
 
 function nomMuscle(ex) {
-  const g = GROUPES.find((g) => g.muscles?.includes(ex.m[0]) || g.categorie === ex.c);
+  const g = GROUPES.find((g) => g.categorie === ex.c) || GROUPES.find((g) => g.muscles?.includes(ex.m[0]));
   return g ? g.nom : '';
 }
 
@@ -177,6 +178,10 @@ function afficherEnCours(el) {
           <div class="tres-discret">Temps</div>
           <div id="chrono" style="font-size:30px;font-weight:800;font-variant-numeric:tabular-nums">${chrono(s.debutTs)}</div>
         </div>
+        <div style="text-align:center">
+          <div class="tres-discret">Calories</div>
+          <div style="font-size:22px;font-weight:800;margin-top:5px">🔥 <span id="kcal-direct">${Math.round(kcalEnDirect())}</span></div>
+        </div>
         <div style="text-align:right">
           <div class="tres-discret">Séries</div>
           <div style="font-size:30px;font-weight:800">${faites}<span class="discret" style="font-size:18px"> / ${total}</span></div>
@@ -232,10 +237,18 @@ function afficherEnCours(el) {
     const c = el.querySelector('#chrono');
     if (!c || !etat.enCours) return;
     c.textContent = chrono(etat.enCours.debutTs);
+    const k = el.querySelector('#kcal-direct');
+    if (k) k.textContent = Math.round(kcalEnDirect());
     const j = el.querySelector('#jauge-temps');
     if (j) j.style.width = Math.min(100, ((Date.now() - etat.enCours.debutTs) / 60000 / etat.enCours.dureeVisee) * 100) + '%';
   }, 1000);
   return () => clearInterval(minuteur);
+}
+
+/** Calories depuis le début de la séance en cours (séries validées + temps écoulé). */
+function kcalEnDirect() {
+  const s = etat.enCours;
+  return caloriesSeance({ ...s, duree: (Date.now() - s.debutTs) / 60000 }).total;
 }
 
 function carteEnCours(e, i, n) {
@@ -249,7 +262,7 @@ function carteEnCours(e, i, n) {
       ${image(ex) ? `<img class="vignette" src="${image(ex)}" alt="" loading="lazy" data-voir="${ex.id}" style="cursor:pointer">` : '<div class="vignette vide"></div>'}
       <div class="flex1" data-voir="${ex.id}" style="cursor:pointer">
         <div style="font-weight:700;line-height:1.25">${esc(ex?.n || e.exId)}</div>
-        <div class="tres-discret">${avant ? 'Dernière fois : ' + avant.map((x) => col.kg && x.kg ? `${x.reps}×${fmt(x.kg)}` : x.reps).join(' · ') : 'Première fois 💥'}</div>
+        <div class="tres-discret">${avant ? 'Dernière fois : ' + avant.map((x) => texteSerie(ex, x)).join(' · ') : 'Première fois 💥'}</div>
       </div>
       <button class="btn btn-icone" data-menu="${i}" aria-label="Options">⋯</button>
     </div>
@@ -337,7 +350,7 @@ function terminer() {
       });
       fermer();
       brouillon.types = new Set();
-      celebrer({ ...calcul, ...gain });
+      celebrer({ ...calcul, ...gain, kcal: caloriesSeance(seance) });
       aller('seance-detail/' + seance.id);
     };
   });

@@ -4,6 +4,7 @@ import { niveauActuel, titreNiveau, seancesSemaine, serieSemaines } from '../xp.
 import { statutOuverture } from '../salles.js';
 import { nomGroupe } from '../exercices.js';
 import { ICONES } from '../ui.js';
+import { totalCalories } from '../calories.js';
 import { ajouterPoids } from './progres.js';
 import { ajouterSeanceManuelle } from './calendrier.js';
 
@@ -56,9 +57,10 @@ export function afficher(el) {
     </div>
 
     <h2>Cette semaine</h2>
-    <div class="grille-3">
+    <div class="grille-2">
       <div class="stat"><div class="val">${semaine.length}</div><div class="lib">Séances</div></div>
       <div class="stat"><div class="val">${minutesSemaine ? duree(minutesSemaine) : '0'}</div><div class="lib">Temps</div></div>
+      <div class="stat"><div class="val">${semaine.length ? Math.round(totalCalories(semaine)).toLocaleString('fr-FR') : '0'}</div><div class="lib">kcal dépensées</div></div>
       <div class="stat"><div class="val">${serie}${serie ? ' 🔥' : ''}</div><div class="lib">Sem. d'affilée</div></div>
     </div>
 

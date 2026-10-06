@@ -1,10 +1,11 @@
-import { etat, esc, historiqueExercice, kg, dateCourte } from '../store.js';
+import { etat, esc, jour, historiqueExercice, kg, dateCourte } from '../store.js';
 import { entete, aller } from '../nav.js';
 import {
-  tous, exo, image, normaliser, GROUPES, MUSCLES, MATERIEL, CATEGORIES, NIVEAUX, variantes, muscleGroupe,
+  tous, exo, image, normaliser, texteSerie, colonnes, GROUPES, MUSCLES, MATERIEL, CATEGORIES, NIVEAUX, variantes, muscleGroupe,
 } from '../exercices.js';
 import { ICONES, ouvrirFeuille, graphe } from '../ui.js';
 import { ajouterALaSeance } from './seance.js';
+import { metExercice, poidsA } from '../calories.js';
 
 const filtres = { texte: '', groupe: '', materiel: '', essentiels: true };
 const PAR_PAGE = 40;
@@ -94,9 +95,11 @@ export function afficherExercice(el, [id]) {
   if (!ex) { entete('Exercice'); el.innerHTML = '<p class="discret">Exercice introuvable.</p>'; return; }
   entete(ex.n);
   const h = historiqueExercice(ex.id);
-  const record = h.length ? Math.max(...h.map((x) => x.max)) : 0;
+  const record = h.length && colonnes(ex).mode === 'muscu' ? Math.max(...h.map((x) => x.max)) : 0;
   const vars = variantes(ex);
   const imgs = ex.i.map((_, i) => image(ex, i));
+  const poids = poidsA(jour());
+  const kcal10 = Math.round((metExercice(ex) * poids.kg * 10) / 60);
 
   el.innerHTML = `
     ${imgs.length ? `<div class="anim-ex">
@@ -114,6 +117,12 @@ export function afficherExercice(el, [id]) {
       ${ex.k ? `<span class="etiquette">${ex.k === 'compound' ? 'Polyarticulaire' : 'Isolation'}</span>` : ''}
     </div>
 
+    <div class="carte" style="margin-top:12px"><div class="ligne">
+      <div style="font-size:26px">🔥</div>
+      <div class="flex1"><div style="font-weight:750">≈ ${kcal10} kcal pour 10 min d’effort</div>
+      <div class="tres-discret">Intensité ${String(metExercice(ex)).replace('.', ',')} MET · ${poids.estime ? 'calcul pour 75 kg (ajoute une pesée)' : `pour ${String(poids.kg).replace('.', ',')} kg`}</div></div>
+    </div></div>
+
     ${etat.enCours ? `<button class="btn btn-principal btn-plein" id="ajout-seance" style="margin-top:14px">${ICONES.plus} Ajouter à ma séance en cours</button>` : ''}
 
     <h2>Muscles</h2>
@@ -126,12 +135,14 @@ export function afficherExercice(el, [id]) {
     ${ex.fr ? '' : '<p class="tres-discret">Consignes disponibles en anglais seulement pour cet exercice. Dans Safari, le bouton « aA » permet de traduire la page.</p>'}
     <ol class="etapes" ${ex.fr ? '' : 'lang="en"'}>${ex.t.map((t) => `<li>${esc(t)}</li>`).join('')}</ol>
 
-    <h2>Mes charges</h2>
+    <h2>${colonnes(ex).mode === 'muscu' ? 'Mes charges' : 'Mon historique'}</h2>
     ${h.length ? `<div class="carte cliquable" data-aller="charge/${encodeURIComponent(ex.id)}">
         <div class="grille-2">
-          <div><div class="tres-discret">Record</div><div class="charge-plus">${record ? kg(record) : '–'}</div></div>
+          ${colonnes(ex).mode === 'muscu'
+            ? `<div><div class="tres-discret">Record</div><div class="charge-plus">${record ? kg(record) : '–'}</div></div>`
+            : `<div><div class="tres-discret">Séances</div><div class="charge-plus">${h.length}</div></div>`}
           <div><div class="tres-discret">Dernière fois (${dateCourte(h[h.length - 1].date)})</div>
-            <div style="font-weight:700;margin-top:6px">${h[h.length - 1].series.map((x) => x.kg ? `${x.reps}×${String(x.kg).replace('.', ',')}` : x.reps).join(' · ')}</div></div>
+            <div style="font-weight:700;margin-top:6px">${h[h.length - 1].series.map((x) => texteSerie(ex, x)).join(' · ')}</div></div>
         </div>
         ${h.length >= 2 && record ? graphe(h.map((x) => ({ date: x.date, y: x.max })), { unite: 'kg', hauteur: 140 }) : ''}
         <div class="btn-lien" style="text-align:right">Tout l’historique ›</div>

@@ -66,6 +66,15 @@ export function normaliser(s) {
   return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
 }
 
+/** Texte court d'une série : "10×45", "15 min · 2,5 km", "30 s". */
+export function texteSerie(ex, x) {
+  const n = (v) => String(v).replace('.', ',');
+  const col = colonnes(ex);
+  if (col.mode === 'cardio') return `${n(x.reps)} min${x.kg ? ` · ${n(x.kg)} km` : ''}`;
+  if (col.mode === 'etirement') return `${n(x.reps)} s`;
+  return x.kg ? `${n(x.reps)}×${n(x.kg)}` : `${n(x.reps)} reps`;
+}
+
 /** Colonnes de saisie selon le type d'exercice. */
 export function colonnes(ex) {
   if (ex?.c === 'cardio') return { reps: 'Min', kg: 'Km', mode: 'cardio' };
