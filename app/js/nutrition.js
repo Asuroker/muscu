@@ -3,6 +3,7 @@
 // [nom, kcal, protéines, glucides, lipides]
 import { etat, jour } from './store.js';
 import { poidsA } from './calories.js';
+import { RECETTES_PLUS } from './recettes.js';
 
 export const INGREDIENTS = {
   avoine: ['Flocons d’avoine', 372, 13.5, 58.7, 7],
@@ -53,10 +54,42 @@ export const INGREDIENTS = {
   feta: ['Feta', 265, 14, 1, 21],
   huile: ['Huile d’olive', 900, 0, 0, 100],
   soja: ['Sauce soja', 60, 8, 5, 0.1],
+  crevettes: ['Crevettes décortiquées (crues)', 85, 18, 0.5, 1],
+  cabillaud: ['Dos de cabillaud (cru)', 80, 18, 0, 0.7],
+  saumonFume: ['Saumon fumé', 180, 22, 0.5, 10],
+  sardines: ['Sardines à l’huile (égouttées)', 210, 24, 0, 13],
+  rumsteck: ['Rumsteck de bœuf (cru)', 130, 22, 0, 4.5],
+  porc: ['Filet mignon de porc (cru)', 120, 21, 0, 4],
+  blancOeuf: ['Blancs d’œufs liquides', 48, 10.5, 0.7, 0.2],
+  mozzarella: ['Mozzarella', 250, 18, 1, 19],
+  parmesan: ['Parmesan', 390, 33, 0, 28],
+  yaourtGrec: ['Yaourt grec 2 %', 75, 10, 4, 2],
+  laitCoco: ['Lait de coco allégé', 75, 0.8, 2, 7],
+  houmous: ['Houmous', 270, 8, 14, 20],
+  pesto: ['Pesto', 450, 5, 6, 45],
+  olives: ['Olives noires', 150, 1, 1, 15],
+  semoule: ['Semoule / couscous (crue)', 360, 12.5, 72, 1.5],
+  nouillesRiz: ['Nouilles de riz (sèches)', 360, 6, 80, 0.6],
+  boulgour: ['Boulgour (cru)', 345, 12, 69, 1.3],
+  gnocchis: ['Gnocchis', 150, 4, 32, 0.5],
+  cremeRiz: ['Crème de riz (poudre)', 370, 7, 82, 0.8],
+  granola: ['Granola', 450, 10, 62, 17],
+  pita: ['Pain pita', 275, 9, 55, 1.2],
+  chia: ['Graines de chia', 490, 17, 8, 31],
+  dattes: ['Dattes', 280, 2.5, 66, 0.4],
+  mangue: ['Mangue', 60, 0.8, 14, 0.4],
+  ananas: ['Ananas', 50, 0.5, 12, 0.1],
+  mais: ['Maïs (conserve, égoutté)', 85, 3, 15, 1.2],
+  petitsPois: ['Petits pois (surgelés)', 80, 5.5, 11, 0.4],
+  edamame: ['Edamame (surgelés, écossés)', 120, 11, 7, 5],
+  champignons: ['Champignons de Paris', 22, 3, 2, 0.3],
+  carotte: ['Carotte', 37, 0.8, 7.5, 0.2],
+  concombre: ['Concombre', 15, 0.7, 2.5, 0.1],
+  salade: ['Salade verte', 15, 1.4, 1.5, 0.2],
 };
 
 // type : petitdej | repas | collation · tags : seche, masse, equilibre, vege, rapide, pre, post
-export const RECETTES = [
+const RECETTES_BASE = [
   {
     id: 'porridge-proteine', nom: 'Porridge protéiné banane & cacahuète', emoji: '🥣', type: 'petitdej', minutes: 8, portions: 1,
     tags: ['masse', 'equilibre', 'rapide'],
@@ -297,6 +330,8 @@ export const RECETTES = [
     ],
   },
 ];
+
+export const RECETTES = [...RECETTES_BASE, ...RECETTES_PLUS];
 
 export const TYPES_REPAS = { petitdej: 'Petit-déjeuner', repas: 'Déjeuner / dîner', collation: 'Collation' };
 export const TAGS = {
