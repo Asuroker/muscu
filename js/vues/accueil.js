@@ -8,7 +8,7 @@ import { totalCalories } from '../calories.js';
 import { ajouterPoids, exporter, joursDepuisSauvegarde } from './progres.js';
 import { ajouterSeanceManuelle } from './calendrier.js';
 import { carteObjectifPoids } from './objectifs.js';
-import { besoins, OBJECTIFS_NUTRI } from '../nutrition.js';
+import { besoins, OBJECTIFS_NUTRI, RECETTES, TYPES_REPAS } from '../nutrition.js';
 
 export function carteNiveau() {
   const n = niveauActuel();
@@ -79,6 +79,17 @@ export function afficher(el) {
         <div class="tres-discret">${besoins().kcal.toLocaleString('fr-FR')} kcal / jour</div>
       </div>
     </div>
+    <div class="carte cliquable" data-aller="recettes" style="margin-top:10px">
+      <div class="ligne">
+        <div class="vignette vide" style="font-size:28px">🍽️</div>
+        <div class="flex1">
+          <div style="font-weight:700">Recettes</div>
+          <div class="tres-discret">${RECETTES.length} idées de repas · ${esc(TYPES_REPAS[recetteDuJour().type])} du jour : ${esc(recetteDuJour().nom)}</div>
+        </div>
+        ${ICONES.chevron}
+      </div>
+      <button class="btn btn-petit btn-plein" data-aller="recette/${recetteDuJour().id}" style="margin-top:10px">${recetteDuJour().emoji} Voir l’idée du jour</button>
+    </div>
 
     <h2>Ma salle</h2>
     ${sf ? `<div class="carte cliquable" data-aller="salle/${sf.id}">
@@ -116,7 +127,7 @@ export function afficher(el) {
       </div>` : ''}
   `;
 
-  el.querySelectorAll('[data-aller]').forEach((b) => (b.onclick = () => aller(b.dataset.aller)));
+  el.querySelectorAll('[data-aller]').forEach((b) => (b.onclick = (ev) => { ev.stopPropagation(); aller(b.dataset.aller); }));
   document.querySelectorAll('#actions-haut [data-aller]').forEach((b) => (b.onclick = () => aller(b.dataset.aller)));
   el.querySelector('#pesee').onclick = () => ajouterPoids();
   const sauv = el.querySelector('#sauvegarder');
@@ -146,6 +157,15 @@ function bandeauSauvegarde() {
       <button class="btn" id="plus-tard">Plus tard</button>
     </div>
   </div>`;
+}
+
+/** Une recette différente chaque jour, adaptée à l'objectif nutritionnel. */
+function recetteDuJour() {
+  const tag = OBJECTIFS_NUTRI[besoins().objectif].tag;
+  const choix = RECETTES.filter((r) => r.type === 'repas' && r.tags.includes(tag));
+  const d = new Date();
+  const n = d.getFullYear() * 400 + d.getMonth() * 31 + d.getDate();
+  return choix[n % choix.length];
 }
 
 const nbObjectifs = () => (etat.objectifs?.charges || []).filter((c) => !c.atteintLe).length + (etat.objectifs?.poids && !etat.objectifs.poids.atteintLe ? 1 : 0);
