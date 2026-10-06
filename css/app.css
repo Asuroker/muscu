@@ -328,3 +328,11 @@ tr.faite input { color: var(--vert); }
 .chargement { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 24px; color: var(--texte-2); }
 .rond-charge { width: 20px; height: 20px; border-radius: 50%; border: 3px solid var(--bord); border-top-color: var(--accent); animation: tourne .8s linear infinite; }
 @keyframes tourne { to { transform: rotate(360deg); } }
+
+/* Exercice terminé (carte repliée) */
+.coche.rond { border-radius: 50%; width: 40px; height: 40px; flex-shrink: 0; color: var(--texte-3); }
+.coche.rond:not(.ok) svg { opacity: .45; }
+.coche.rond.ok { color: #fff; }
+.ex-carte.replie { padding: 10px 12px; background: color-mix(in srgb, var(--vert) 7%, var(--carte)); }
+.vignette.petite { width: 40px; height: 40px; border-radius: 10px; }
+body.avec-repos main { padding-bottom: calc(var(--onglets-h) + var(--bas-sur) + 110px); }
