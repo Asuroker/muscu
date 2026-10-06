@@ -166,18 +166,26 @@ export function afficherCharge(el, [id]) {
   const muscu = col.mode === 'muscu';
   const rec = muscu && h.length ? Math.max(...h.map((x) => x.max)) : 0;
   const unRM = muscu && h.length ? Math.max(...h.map((x) => x.unRM)) : 0;
-  const minutes = (x) => x.series.reduce((t, s) => t + (s.reps || 0), 0) / (col.mode === 'etirement' ? 60 : 1);
+  const minutes = (x) => x.series.reduce((t, s) => t + (s.reps || 0), 0) / (['etirement', 'gainage'].includes(col.mode) ? 60 : 1);
   const km = (x) => x.series.reduce((t, s) => t + (s.kg || 0), 0);
-  const kmTotal = h.reduce((t, x) => t + km(x), 0);
+  const kmTotal = col.mode === 'cardio' ? h.reduce((t, x) => t + km(x), 0) : 0;
+  const gainage = col.mode === 'gainage';
+  const meilleur = (x) => Math.max(...x.series.map((s) => s.reps || 0));
+  const record = gainage && h.length ? Math.max(...h.map(meilleur)) : 0;
   el.innerHTML = `
-    ${muscu ? `<div class="grille-2">
+    ${gainage ? `<div class="grille-2">
+      <div class="stat"><div class="val">${record} s</div><div class="lib">Meilleur maintien</div></div>
+      <div class="stat"><div class="val">${(() => { const sec = Math.round(h.reduce((t, x) => t + minutes(x), 0) * 60); return sec < 120 ? sec + ' s' : duree(sec / 60); })()}</div><div class="lib">Temps total</div></div>
+    </div>
+    ${h.length > 1 ? `<h2>Meilleur maintien par séance</h2><div class="carte">${graphe(h.map((x) => ({ date: x.date, y: meilleur(x) })), { unite: 's' })}</div>` : ''}`
+    : muscu ? `<div class="grille-2">
       <div class="stat"><div class="val">${rec ? kg(rec) : '–'}</div><div class="lib">Record</div></div>
       <div class="stat"><div class="val">${unRM ? kg(Math.round(unRM)) : '–'}</div><div class="lib">1RM estimé</div></div>
     </div>` : `<div class="grille-2">
       <div class="stat"><div class="val">${duree(h.reduce((t, x) => t + minutes(x), 0))}</div><div class="lib">Temps total</div></div>
       <div class="stat"><div class="val">${col.kg && kmTotal ? String(Math.round(kmTotal * 10) / 10).replace('.', ',') + ' km' : h.length}</div><div class="lib">${col.kg && kmTotal ? 'Distance totale' : 'Séances'}</div></div>
     </div>`}
-    ${!muscu && h.length > 1 ? `<h2>${col.kg && kmTotal ? 'Distance' : 'Durée'} par séance</h2><div class="carte">${graphe(h.map((x) => ({ date: x.date, y: col.kg && kmTotal ? km(x) : minutes(x) })), { unite: col.kg && kmTotal ? 'km' : 'min' })}</div>` : ''}
+    ${!muscu && !gainage && h.length > 1 ? `<h2>${col.kg && kmTotal ? 'Distance' : 'Durée'} par séance</h2><div class="carte">${graphe(h.map((x) => ({ date: x.date, y: col.kg && kmTotal ? km(x) : minutes(x) })), { unite: col.kg && kmTotal ? 'km' : 'min' })}</div>` : ''}
     ${muscu && h.length > 1 ? `<h2>Charge max par séance</h2><div class="carte">${graphe(h.map((x) => ({ date: x.date, y: x.max })), { unite: 'kg' })}</div>
       <h2>Volume par séance</h2><div class="carte">${graphe(h.map((x) => ({ date: x.date, y: x.volume })), { unite: 'kg' })}</div>` : ''}
     <h2>Historique</h2>
@@ -193,8 +201,8 @@ export function afficherCharge(el, [id]) {
 
 function texteCumul(ex, h) {
   const col = colonnes(ex);
-  const min = h.reduce((t, x) => t + x.series.reduce((u, s) => u + (s.reps || 0), 0), 0) / (col.mode === 'etirement' ? 60 : 1);
-  const km = h.reduce((t, x) => t + x.series.reduce((u, s) => u + (s.kg || 0), 0), 0);
+  const min = h.reduce((t, x) => t + x.series.reduce((u, s) => u + (s.reps || 0), 0), 0) / (['etirement', 'gainage'].includes(col.mode) ? 60 : 1);
+  const km = col.mode === 'cardio' ? h.reduce((t, x) => t + x.series.reduce((u, s) => u + (s.kg || 0), 0), 0) : 0;
   return duree(min) + (km ? ` · ${String(Math.round(km * 10) / 10).replace('.', ',')} km` : '');
 }
 
