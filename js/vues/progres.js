@@ -200,7 +200,8 @@ export function afficherReglages(el) {
     </label>
 
     <h2>Sauvegarde</h2>
-    <p class="discret">Tes données restent sur ce téléphone. Exporte-les de temps en temps (dans Fichiers ou iCloud) pour ne rien perdre.</p>
+    <p class="discret">Tes données restent sur ce téléphone. Exporte-les dans <strong>Fichiers › iCloud Drive</strong> pour ne rien perdre si l’app est supprimée ou si tu changes d’iPhone. L’accueil te le rappelle tous les 7 jours.</p>
+    <p class="${joursDepuisSauvegarde() === null || joursDepuisSauvegarde() >= 7 ? 'statut-ferme' : 'statut-ouvert'}" style="font-size:14px">${texteDerniereSauvegarde()}</p>
     <div class="pile">
       <button class="btn btn-plein" id="exporter">Exporter mes données</button>
       <label class="btn btn-plein" style="cursor:pointer">Importer une sauvegarde<input type="file" id="importer" accept="application/json,.json" hidden></label>
@@ -245,16 +246,40 @@ export function afficherReglages(el) {
   };
 }
 
-async function exporter() {
+/** Jours écoulés depuis la dernière sauvegarde (null si jamais). */
+export function joursDepuisSauvegarde() {
+  if (!etat.derniereSauvegarde) return null;
+  return Math.floor((Date.now() - new Date(etat.derniereSauvegarde).getTime()) / 86400000);
+}
+
+export function texteDerniereSauvegarde() {
+  const j = joursDepuisSauvegarde();
+  if (j === null) return 'Aucune sauvegarde pour le moment';
+  return `Dernière sauvegarde : ${j === 0 ? "aujourd'hui" : j === 1 ? 'hier' : `il y a ${j} jours`}`;
+}
+
+const noterSauvegarde = () => maj((e) => { e.derniereSauvegarde = new Date().toISOString(); });
+
+/** Exporte toutes les données dans un fichier (feuille de partage sur iPhone → « Enregistrer dans Fichiers »). */
+export async function exporter() {
   const nom = `muscu-sauvegarde-${jour()}.json`;
   const blob = new Blob([JSON.stringify(etat, null, 1)], { type: 'application/json' });
   const fichier = new File([blob], nom, { type: 'application/json' });
   if (navigator.canShare?.({ files: [fichier] })) {
-    try { await navigator.share({ files: [fichier], title: 'Sauvegarde Muscu' }); return; } catch (e) { if (e.name === 'AbortError') return; }
+    try {
+      await navigator.share({ files: [fichier], title: 'Sauvegarde Muscu' });
+      noterSauvegarde();
+      toast('Sauvegarde effectuée ✓');
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+    }
   }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = nom;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  noterSauvegarde();
+  toast('Sauvegarde téléchargée ✓');
 }
