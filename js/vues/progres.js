@@ -8,6 +8,8 @@ import { ICONES, ouvrirFeuille, confirmer, toast, graphe } from '../ui.js';
 import { carteNiveau } from './accueil.js';
 import { celebrer } from './recompenses.js';
 import { totalCalories } from '../calories.js';
+import { verifierPoids } from '../objectifs.js';
+import { carteObjectifPoids } from './objectifs.js';
 
 export function afficher(el) {
   entete('Progrès');
@@ -29,6 +31,10 @@ export function afficher(el) {
     <div class="liste" style="margin-top:16px">
       <a class="item" href="#/recompenses"><div class="vignette vide" style="font-size:26px">🎁</div>
         <div class="flex1"><div class="titre">Récompenses & niveaux</div><div class="sous">${bons ? `${bons} bon${bons > 1 ? 's' : ''} à utiliser` : 'Tes bons et les règles des récompenses'}</div></div>${ICONES.chevron}</a>
+      <a class="item" href="#/objectifs"><div class="vignette vide" style="font-size:26px">🎯</div>
+        <div class="flex1"><div class="titre">Mes objectifs</div><div class="sous">Poids corporel et charges à atteindre</div></div>${ICONES.chevron}</a>
+      <a class="item" href="#/nutrition"><div class="vignette vide" style="font-size:26px">🥗</div>
+        <div class="flex1"><div class="titre">Nutrition & recettes</div><div class="sous">Besoins du jour, conseils, idées de repas</div></div>${ICONES.chevron}</a>
       <a class="item" href="#/charges"><div class="vignette vide" style="font-size:26px">🏋️</div>
         <div class="flex1"><div class="titre">Mes charges</div><div class="sous">${nbExos ? `${nbExos} exercice${nbExos > 1 ? 's' : ''} suivi${nbExos > 1 ? 's' : ''}` : 'Historique des poids par machine'}</div></div>${ICONES.chevron}</a>
       <a class="item" href="#/poids"><div class="vignette vide" style="font-size:26px">⚖️</div>
@@ -63,14 +69,18 @@ export function ajouterPoids() {
       const d = el.querySelector('#p-date').value || jour();
       if (!(v > 20 && v < 400)) return toast('Poids invalide');
       const premiereDuJour = !etat.xp.some((x) => x.raison === 'Pesée' && x.date === d);
-      let gain;
+      let gain, lignes = [];
       maj((e) => {
         e.poids = e.poids.filter((p) => p.date !== d);
         e.poids.push({ date: d, kg: Math.round(v * 10) / 10 });
-        if (premiereDuJour) gain = ajouterXp(e, 5, 'Pesée', d);
+        if (premiereDuJour) lignes.push({ lib: 'Pesée', xp: 5 });
+        lignes.push(...verifierPoids(e));
+        const total = lignes.reduce((t, l) => t + l.xp, 0);
+        if (total) gain = ajouterXp(e, total, premiereDuJour ? 'Pesée' : 'Objectif', d);
       });
       fermer();
-      if (gain?.niveaux.length) celebrer({ total: 5, lignes: [{ lib: 'Pesée', xp: 5 }], ...gain });
+      const total = lignes.reduce((t, l) => t + l.xp, 0);
+      if (gain?.niveaux.length || lignes.some((l) => l.lib.startsWith('🎯'))) celebrer({ total, lignes, ...gain });
       else toast(premiereDuJour ? 'Pesée enregistrée · +5 XP' : 'Pesée enregistrée');
     };
   });
@@ -89,6 +99,8 @@ export function afficherPoids(el) {
   const premier = p[0], dernier = p[p.length - 1];
   const diff = dernier.kg - premier.kg;
   el.innerHTML = `
+    ${etat.objectifs?.poids ? carteObjectifPoids({ compacte: true }) : `<button class="btn btn-plein" data-aller="objectifs">🎯 Fixer un objectif de poids</button>`}
+    <div style="height:10px"></div>
     <div class="grille-3">
       <div class="stat"><div class="val">${kg(dernier.kg)}</div><div class="lib">Actuel</div></div>
       <div class="stat"><div class="val">${diff > 0 ? '+' : diff < 0 ? '−' : ''}${kg(Math.abs(diff))}</div><div class="lib">Depuis le début</div></div>
@@ -105,6 +117,7 @@ export function afficherPoids(el) {
         <button class="btn btn-icone" data-suppr="${x.date}" aria-label="Supprimer">${ICONES.poubelle}</button>
       </div>`;
     }).join('')}</div>`;
+  el.querySelectorAll('[data-aller]').forEach((b) => (b.onclick = () => aller(b.dataset.aller)));
   el.querySelectorAll('[data-suppr]').forEach((b) => (b.onclick = async () => {
     if (await confirmer('Supprimer cette pesée ?', { ok: 'Supprimer', danger: true })) {
       maj((e) => (e.poids = e.poids.filter((x) => x.date !== b.dataset.suppr)));

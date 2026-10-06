@@ -7,6 +7,8 @@ import { ICONES } from '../ui.js';
 import { totalCalories } from '../calories.js';
 import { ajouterPoids, exporter, joursDepuisSauvegarde } from './progres.js';
 import { ajouterSeanceManuelle } from './calendrier.js';
+import { carteObjectifPoids } from './objectifs.js';
+import { besoins, OBJECTIFS_NUTRI } from '../nutrition.js';
 
 export function carteNiveau() {
   const n = niveauActuel();
@@ -63,6 +65,19 @@ export function afficher(el) {
       <div class="stat"><div class="val">${minutesSemaine ? duree(minutesSemaine) : '0'}</div><div class="lib">Temps</div></div>
       <div class="stat"><div class="val">${semaine.length ? Math.round(totalCalories(semaine)).toLocaleString('fr-FR') : '0'}</div><div class="lib">kcal dépensées</div></div>
       <div class="stat"><div class="val">${serie}${serie ? ' 🔥' : ''}</div><div class="lib">Sem. d'affilée</div></div>
+    </div>
+
+    <h2>Objectifs & nutrition</h2>
+    ${etat.objectifs?.poids ? carteObjectifPoids({ compacte: true }) + '<div style="height:10px"></div>' : ''}
+    <div class="grille-2">
+      <div class="carte cliquable" data-aller="objectifs" style="margin:0">
+        <div style="font-size:24px">🎯</div><div style="font-weight:700">Objectifs</div>
+        <div class="tres-discret">${nbObjectifs() ? `${nbObjectifs()} en cours` : 'Poids, charges…'}</div>
+      </div>
+      <div class="carte cliquable" data-aller="nutrition" style="margin:0">
+        <div style="font-size:24px">${OBJECTIFS_NUTRI[besoins().objectif].emoji}</div><div style="font-weight:700">Nutrition</div>
+        <div class="tres-discret">${besoins().kcal.toLocaleString('fr-FR')} kcal / jour</div>
+      </div>
     </div>
 
     <h2>Ma salle</h2>
@@ -132,6 +147,8 @@ function bandeauSauvegarde() {
     </div>
   </div>`;
 }
+
+const nbObjectifs = () => (etat.objectifs?.charges || []).filter((c) => !c.atteintLe).length + (etat.objectifs?.poids && !etat.objectifs.poids.atteintLe ? 1 : 0);
 
 function evolution(poids) {
   if (poids.length < 2) return '';

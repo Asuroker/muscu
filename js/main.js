@@ -8,6 +8,8 @@ import * as bibliotheque from './vues/bibliotheque.js';
 import * as progres from './vues/progres.js';
 import * as salles from './vues/salles.js';
 import * as recompenses from './vues/recompenses.js';
+import * as objectifs from './vues/objectifs.js';
+import * as nutrition from './vues/nutrition.js';
 
 // route -> [module, fonction, onglet, page racine ?]
 const ROUTES = {
@@ -25,6 +27,10 @@ const ROUTES = {
   salles: [salles, 'afficher', 'progres', false],
   salle: [salles, 'afficherSalle', 'progres', false],
   recompenses: [recompenses, 'afficher', 'progres', false],
+  objectifs: [objectifs, 'afficher', 'progres', false],
+  nutrition: [nutrition, 'afficher', 'progres', false],
+  recettes: [nutrition, 'afficherRecettes', 'progres', false],
+  recette: [nutrition, 'afficherRecette', 'progres', false],
 };
 
 const vue = document.getElementById('vue');

@@ -6,6 +6,7 @@ import {
 import { ICONES, ouvrirFeuille, graphe } from '../ui.js';
 import { ajouterALaSeance } from './seance.js';
 import { metExercice, poidsA } from '../calories.js';
+import { ligneObjectifExercice, editerObjectifCharge } from './objectifs.js';
 
 const filtres = { texte: '', groupe: '', materiel: '', essentiels: true };
 const PAR_PAGE = 40;
@@ -149,10 +150,13 @@ export function afficherExercice(el, [id]) {
       </div>`
       : '<p class="discret">Tu n’as pas encore fait cet exercice. Tes charges apparaîtront ici après ta première séance.</p>'}
 
+    ${colonnes(ex).mode === 'muscu' ? ligneObjectifExercice(ex.id) : ''}
+
     ${vars.length ? `<h2>Variantes</h2><div class="liste">${vars.map(ligne).join('')}</div>` : ''}
   `;
 
   el.querySelectorAll('[data-aller]').forEach((b) => (b.onclick = () => aller(b.dataset.aller)));
+  el.querySelectorAll('[data-objectif-ex]').forEach((b) => (b.onclick = () => editerObjectifCharge(ex.id)));
   const ajout = el.querySelector('#ajout-seance');
   if (ajout) ajout.onclick = () => { ajouterALaSeance(ex); aller('seance'); };
 
