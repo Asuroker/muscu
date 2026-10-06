@@ -72,13 +72,23 @@ export function texteSerie(ex, x) {
   const col = colonnes(ex);
   if (col.mode === 'cardio') return `${n(x.reps)} min${x.kg ? ` · ${n(x.kg)} km` : ''}`;
   if (col.mode === 'etirement') return `${n(x.reps)} s`;
+  if (col.mode === 'gainage') return `${n(x.reps)} s${x.kg ? ` · +${n(x.kg)} kg` : ''}`;
   return x.kg ? `${n(x.reps)}×${n(x.kg)}` : `${n(x.reps)} reps`;
 }
+
+// Exercices de maintien (gainage, isométrie) : on les fait en secondes.
+const GAINAGE_EN_PLUS = new Set(['One_Handed_Hang', 'Stomach_Vacuum']);
+const PAS_GAINAGE = new Set(['Prone_Manual_Hamstring']);
+export const estGainage = (ex) => !!ex && ((ex.f === 'static' && ex.c !== 'stretching' && !PAS_GAINAGE.has(ex.id)) || GAINAGE_EN_PLUS.has(ex.id));
+
+/** Vrai si les séries se comptent en secondes (gainage, étirement) : on peut lancer un minuteur. */
+export const enSecondes = (ex) => ['gainage', 'etirement'].includes(colonnes(ex).mode);
 
 /** Colonnes de saisie selon le type d'exercice. */
 export function colonnes(ex) {
   if (ex?.c === 'cardio') return { reps: 'Min', kg: 'Km', mode: 'cardio' };
   if (ex?.c === 'stretching') return { reps: 'Sec', kg: null, mode: 'etirement' };
+  if (estGainage(ex)) return { reps: 'Sec', kg: 'Lest kg', mode: 'gainage' };
   if (ex?.e === 'body only') return { reps: 'Reps', kg: 'Lest kg', mode: 'muscu' };
   return { reps: 'Reps', kg: 'Kg', mode: 'muscu' };
 }
@@ -222,6 +232,7 @@ export function seriesParDefaut(ex, minutesCardio = 15, schema = null) {
   const mode = colonnes(ex).mode;
   if (mode === 'cardio') return [{ reps: minutesCardio, kg: 0, faite: false }];
   if (mode === 'etirement') return [{ reps: 30, kg: 0, faite: false }, { reps: 30, kg: 0, faite: false }];
+  if (mode === 'gainage') return Array.from({ length: 3 }, () => ({ reps: 30, kg: 0, faite: false }));
   const compose = ex.k === 'compound';
   const n = schema?.series || (compose ? 4 : 3);
   const reps = schema?.reps || (compose ? 10 : 12);

@@ -1,7 +1,7 @@
 // Estimation des calories dépensées : kcal = MET × poids (kg) × durée (h).
 // Valeurs MET tirées du Compendium of Physical Activities (Ainsworth et al.).
 import { etat } from './store.js';
-import { exo, colonnes } from './exercices.js';
+import { exo, colonnes, estGainage } from './exercices.js';
 
 export const POIDS_PAR_DEFAUT = 75;
 
@@ -43,6 +43,7 @@ export function metExercice(ex, { minutes = 0, km = 0 } = {}) {
     return MET_CARDIO[ex.en] ?? 7.0;
   }
   if (ex.c === 'stretching') return 2.3;
+  if (estGainage(ex)) return 3.8; // gainage / isométrie
   if (ex.c === 'plyometrics') return 8.0;
   if (ex.en === 'Battling Ropes') return 10.0;
   if (['olympic weightlifting', 'strongman', 'powerlifting'].includes(ex.c)) return 6.0;
@@ -83,7 +84,7 @@ export function caloriesSeance(seance, { seuleValidees = true } = {}) {
         minutesExplicites += min;
         parExercice[i] += kcal(metExercice(ex, { minutes: min, km: x.kg || 0 }), kg, min);
       });
-    } else if (mode === 'etirement') {
+    } else if (mode === 'etirement' || mode === 'gainage') {
       const min = series.reduce((t, x) => t + (x.reps || 0), 0) / 60;
       minutesExplicites += min;
       parExercice[i] += kcal(metExercice(ex), kg, min);

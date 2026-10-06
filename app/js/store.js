@@ -23,6 +23,7 @@ function etatInitial() {
       { tous: 1, emoji: '🥤', titre: 'Boisson sucrée' },
     ],
     enCours: null,       // séance en cours (même structure qu'une séance + debutTs)
+    modeles: [],         // séances enregistrées à l'avance {id, nom, date|null, types[], dureeVisee, exercices[], creeLe}
     reglages: { repos: 90 },
     objectifs: { poids: null, charges: [] },
     profil: null,

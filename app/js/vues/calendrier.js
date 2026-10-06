@@ -5,6 +5,7 @@ import { calculerXpSeance, ajouterXp } from '../xp.js';
 import { caloriesSeance, totalCalories, fmtKcal } from '../calories.js';
 import { ICONES, ouvrirFeuille, confirmer, toast } from '../ui.js';
 import { celebrer } from './recompenses.js';
+import { demarrerModele, planifierPour } from './seance.js';
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
 let mois = null;      // Date du 1er du mois affiché
@@ -30,6 +31,9 @@ export function afficher(el) {
   const duMois = etat.seances.filter((s) => { const d = dateDepuisJour(s.date); return d.getMonth() === mois.getMonth() && d.getFullYear() === mois.getFullYear(); });
   const minutesMois = duMois.reduce((t, s) => t + (s.duree || 0), 0);
   const ceJour = (parJour[choisi] || []).sort((a, b) => a.debut.localeCompare(b.debut));
+  const prevus = {};
+  (etat.modeles || []).filter((m) => m.date).forEach((m) => (prevus[m.date] = prevus[m.date] || []).push(m));
+  const prevusCeJour = prevus[choisi] || [];
 
   el.innerHTML = `
     <div class="ligne-entre" style="margin-bottom:12px">
@@ -40,9 +44,9 @@ export function afficher(el) {
     <div class="cal-entete">${['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((j) => `<div>${j}</div>`).join('')}</div>
     <div class="cal-grille">
       ${cases.map((d) => {
-        const k = jour(d), n = (parJour[k] || []).length;
+        const k = jour(d), n = (parJour[k] || []).length, p = (prevus[k] || []).length;
         const cls = ['cal-jour', d.getMonth() !== mois.getMonth() && 'hors', k === auj && 'aujourdhui', n && 'fait', k === choisi && 'choisi'].filter(Boolean).join(' ');
-        return `<button class="${cls}" data-jour="${k}">${d.getDate()}<span class="cal-points">${'<i></i>'.repeat(Math.min(n, 3))}</span></button>`;
+        return `<button class="${cls}" data-jour="${k}">${d.getDate()}<span class="cal-points">${'<i></i>'.repeat(Math.min(n, 3))}${'<i class="prevu"></i>'.repeat(Math.min(p, 2))}</span></button>`;
       }).join('')}
     </div>
     <div class="grille-3" style="margin-top:12px">
@@ -52,9 +56,16 @@ export function afficher(el) {
     </div>
 
     <h2>${dateLongue(choisi)}</h2>
+    ${prevusCeJour.length ? `<div class="liste" style="margin-bottom:10px">${prevusCeJour.map((m) => `<div class="item" data-prevue="${m.id}">
+        <div class="vignette vide" style="font-size:24px">📅</div>
+        <div class="flex1"><div class="titre">Prévue : ${esc(m.nom)}</div>
+          <div class="sous">${m.exercices.length} exercice${m.exercices.length > 1 ? 's' : ''}${choisi < auj ? ' · pas encore faite' : ''}</div></div>
+        ${choisi <= auj && !etat.enCours ? `<button class="btn btn-petit btn-principal" data-go="${m.id}">▶ Démarrer</button>` : ''}
+      </div>`).join('')}</div>` : ''}
     ${ceJour.length ? `<div class="liste">${ceJour.map(ligneSeance).join('')}</div>`
-      : `<p class="discret">Pas de séance ce jour-là.</p>`}
-    <button class="btn btn-plein" id="ajout" style="margin-top:12px">${ICONES.plus} Ajouter une séance ce jour</button>
+      : prevusCeJour.length ? '' : `<p class="discret">Pas de séance ce jour-là.</p>`}
+    ${choisi >= auj ? `<button class="btn btn-plein" id="planifier" style="margin-top:12px">📌 Planifier une séance ce jour</button>` : ''}
+    ${choisi <= auj ? `<button class="btn btn-plein" id="ajout" style="margin-top:12px">${ICONES.plus} Noter une séance faite ce jour</button>` : ''}
   `;
 
   el.querySelector('#prec').onclick = () => { mois.setMonth(mois.getMonth() - 1); afficher(el); };
@@ -66,8 +77,13 @@ export function afficher(el) {
     afficher(el);
   }));
   el.querySelectorAll('[data-seance]').forEach((b) => (b.onclick = () => aller('seance-detail/' + b.dataset.seance)));
-  el.querySelector('#ajout').onclick = () => ajouterSeanceManuelle(choisi);
-  document.getElementById('ajout-haut').onclick = () => ajouterSeanceManuelle(choisi);
+  const ajout = el.querySelector('#ajout');
+  if (ajout) ajout.onclick = () => ajouterSeanceManuelle(choisi);
+  const planifier = el.querySelector('#planifier');
+  if (planifier) planifier.onclick = () => planifierPour(choisi);
+  el.querySelectorAll('[data-go]').forEach((b) => (b.onclick = (ev) => { ev.stopPropagation(); demarrerModele(b.dataset.go); }));
+  el.querySelectorAll('[data-prevue]').forEach((b) => (b.onclick = () => aller('seance')));
+  document.getElementById('ajout-haut').onclick = () => (choisi > auj ? planifierPour(choisi) : ajouterSeanceManuelle(choisi));
 }
 
 function ligneSeance(s) {

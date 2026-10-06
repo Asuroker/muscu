@@ -1,7 +1,7 @@
-import { etat, maj, esc, uid, jour, heure, duree, salle, dernieresSeries } from '../store.js';
+import { etat, maj, esc, uid, jour, heure, duree, salle, dernieresSeries, dateCourte, dateDepuisJour } from '../store.js';
 import { entete, aller, chrono } from '../nav.js';
 import {
-  GROUPES, MODELES, FORMATS, exo, image, colonnes, texteSerie, genererSeance, candidats, famille, seriesParDefaut, nbExercicesPour,
+  GROUPES, MODELES, FORMATS, exo, image, colonnes, texteSerie, genererSeance, candidats, famille, seriesParDefaut, nbExercicesPour, enSecondes, nomGroupe,
 } from '../exercices.js';
 import { calculerXpSeance, ajouterXp } from '../xp.js';
 import { caloriesSeance } from '../calories.js';
@@ -11,7 +11,7 @@ import { choisirExercice } from './bibliotheque.js';
 import { celebrer } from './recompenses.js';
 
 // Brouillon de séance (avant de démarrer), gardé tant que l'app est ouverte.
-const brouillon = { types: new Set(), minutes: 60, materiel: 'tout', proposition: null, salleId: undefined };
+const brouillon = { types: new Set(), minutes: 60, materiel: 'tout', proposition: null, salleId: undefined, modeleId: null, datePrevue: null };
 
 export function afficher(el) {
   return etat.enCours ? afficherEnCours(el) : afficherPreparation(el);
@@ -22,14 +22,15 @@ const schemaActuel = () => etat.reglages.schema || null;
 const memeSchema = (a, b) => (!a && !b) || (a && b && a.series === b.series && a.reps === b.reps);
 
 /** Feuille de réglage « séries × répétitions ». */
-function editeurSchema({ titre, series, reps }, valider) {
+function editeurSchema({ titre, series, reps, unite = 'reps' }, valider) {
   const v = { series, reps };
-  const borne = (k, x) => Math.max(1, Math.min(k === 'series' ? 10 : 50, Math.round(x) || 1));
+  const sec = unite === 'sec';
+  const borne = (k, x) => Math.max(1, Math.min(k === 'series' ? 10 : sec ? 600 : 50, Math.round(x) || 1));
   ouvrirFeuille((el, fermer) => {
     const dessiner = () => {
       el.innerHTML = `<h2>${esc(titre)}</h2>
         <div class="pile">
-          ${[['series', 'Séries'], ['reps', 'Répétitions par série']].map(([k, lib]) => `
+          ${[['series', 'Séries'], ['reps', sec ? 'Secondes par série' : 'Répétitions par série']].map(([k, lib]) => `
             <div class="ligne-entre">
               <strong>${lib}</strong>
               <span class="ligne" style="gap:8px">
@@ -38,8 +39,8 @@ function editeurSchema({ titre, series, reps }, valider) {
                 <button class="btn btn-icone" data-plus="${k}" aria-label="Plus">+</button>
               </span>
             </div>`).join('')}
-          <div class="puces">${[5, 6, 8, 10, 12, 15, 20].map((n) => `<button class="puce ${v.reps === n ? 'active' : ''}" data-r="${n}">${n} reps</button>`).join('')}</div>
-          <div class="centre" style="font-size:28px;font-weight:850">${v.series} × ${v.reps}</div>
+          <div class="puces">${(sec ? [15, 20, 30, 45, 60, 90, 120] : [5, 6, 8, 10, 12, 15, 20]).map((n) => `<button class="puce ${v.reps === n ? 'active' : ''}" data-r="${n}">${n} ${sec ? 's' : 'reps'}</button>`).join('')}</div>
+          <div class="centre" style="font-size:28px;font-weight:850">${v.series} × ${v.reps}${sec ? ' s' : ''}</div>
           <button class="btn btn-principal btn-plein" id="schema-ok">Valider</button>
         </div>`;
       el.querySelectorAll('[data-moins]').forEach((b) => (b.onclick = () => { const k = b.dataset.moins; v[k] = borne(k, v[k] - 1); dessiner(); }));
@@ -66,7 +67,17 @@ function afficherPreparation(el) {
   const b = brouillon;
   const perso = schemaActuel() && !FORMATS.some((f) => memeSchema(f.schema, schemaActuel())) ? schemaActuel() : null;
 
+  const enregistrees = modelesTries();
   el.innerHTML = `
+    ${enregistrees.length ? `<h2>📌 Mes séances enregistrées</h2>
+      <div class="liste">${enregistrees.map((m) => `<div class="item" data-modele-enr="${m.id}">
+        <div class="vignette vide" style="font-size:24px">${m.date ? '📅' : '💾'}</div>
+        <div class="flex1"><div class="titre">${esc(m.nom)}</div>
+          <div class="sous">${m.exercices.length} exercice${m.exercices.length > 1 ? 's' : ''}${m.date ? ' · prévue ' + quand(m.date) : ''}</div></div>
+        <button class="btn btn-petit btn-principal" data-demarrer-modele="${m.id}" aria-label="Démarrer">▶</button>
+      </div>`).join('')}</div>` : ''}
+    ${b.datePrevue ? `<div class="carte" style="margin-top:12px;border-color:var(--accent)">📅 Tu prépares une séance pour <strong>${quand(b.datePrevue)}</strong>. Compose-la puis touche « Enregistrer pour plus tard ».</div>` : ''}
+
     <h2>Que veux-tu travailler ?</h2>
     <div class="puces">${GROUPES.map((g) => `<button class="puce ${b.types.has(g.id) ? 'active' : ''}" data-type="${g.id}">${g.emoji} ${g.nom}</button>`).join('')}</div>
     <p class="tres-discret" style="margin-top:10px">Raccourcis :</p>
@@ -95,6 +106,7 @@ function afficherPreparation(el) {
 
     <div class="pile" style="margin-top:18px">
       <button class="btn btn-principal btn-plein" id="generer" ${b.types.size ? '' : 'disabled'}>${ICONES.melanger} ${b.proposition ? 'Proposer une autre séance' : 'Composer ma séance'}</button>
+      <button class="btn btn-plein" id="vide">✍️ Choisir mes exercices moi-même</button>
     </div>
 
     <div id="proposition"></div>
@@ -136,6 +148,13 @@ function afficherPreparation(el) {
     el.querySelector('#proposition').scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   el.querySelector('#libre').onclick = () => demarrer([]);
+  el.querySelector('#vide').onclick = () => {
+    b.proposition = [];
+    afficherPreparation(el);
+    el.querySelector('#proposition').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  el.querySelectorAll('[data-demarrer-modele]').forEach((x) => (x.onclick = (ev) => { ev.stopPropagation(); demarrerModele(x.dataset.demarrerModele); }));
+  el.querySelectorAll('[data-modele-enr]').forEach((x) => (x.onclick = () => menuModele(x.dataset.modeleEnr, el)));
 
   if (b.proposition) dessinerProposition(el.querySelector('#proposition'), el);
 }
@@ -143,7 +162,7 @@ function afficherPreparation(el) {
 function dessinerProposition(zone, el) {
   const p = brouillon.proposition;
   zone.innerHTML = `
-    <h2>Ta séance · ${p.length} exercice${p.length > 1 ? 's' : ''}</h2>
+    <h2>${brouillon.modeleId ? '✎ ' + esc(modele(brouillon.modeleId)?.nom || 'Ta séance') : 'Ta séance'} · ${p.length} exercice${p.length > 1 ? 's' : ''}</h2>
     ${p.length ? `<div class="liste">${p.map((e, i) => {
       const ex = exo(e.exId), col = colonnes(ex);
       return `<div class="item" style="cursor:default">
@@ -151,8 +170,8 @@ function dessinerProposition(zone, el) {
         <div class="flex1" data-voir="${ex.id}" style="cursor:pointer">
           <div class="titre">${esc(ex.n)}</div>
           <div class="sous">${esc(nomMuscle(ex))}</div>
-          ${col.mode === 'muscu'
-            ? `<button class="btn btn-petit" data-format="${i}" style="margin-top:6px;min-height:32px">${e.series.length} × ${e.series[0].reps} reps ✎</button>`
+          ${col.mode === 'muscu' || col.mode === 'gainage'
+            ? `<button class="btn btn-petit" data-format="${i}" style="margin-top:6px;min-height:32px">${e.series.length} × ${e.series[0].reps} ${col.mode === 'gainage' ? 's' : 'reps'} ✎</button>`
             : `<div class="sous">${e.series.length} × ${e.series[0].reps} ${col.reps.toLowerCase()}</div>`}
         </div>
         <button class="btn btn-icone" data-echanger="${i}" aria-label="Changer d'exercice">${ICONES.echange}</button>
@@ -161,7 +180,9 @@ function dessinerProposition(zone, el) {
     }).join('')}</div>` : '<p class="discret">Aucun exercice trouvé pour ces critères.</p>'}
     <button class="btn btn-plein" id="ajouter-ex" style="margin-top:10px">${ICONES.plus} Ajouter un exercice</button>
     <button class="btn btn-principal btn-plein" id="demarrer" style="margin-top:10px" ${p.length ? '' : 'disabled'}>C'est parti !</button>
+    <button class="btn btn-plein" id="enregistrer" style="margin-top:10px" ${p.length ? '' : 'disabled'}>💾 ${brouillon.modeleId ? 'Mettre à jour la séance enregistrée' : 'Enregistrer pour plus tard'}</button>
   `;
+  zone.querySelector('#enregistrer').onclick = () => enregistrerModele(el);
   zone.querySelectorAll('[data-voir]').forEach((x) => (x.onclick = () => aller('exercice/' + x.dataset.voir)));
   zone.querySelectorAll('[data-retirer]').forEach((x) => (x.onclick = () => { p.splice(+x.dataset.retirer, 1); dessinerProposition(zone, el); }));
   zone.querySelectorAll('[data-echanger]').forEach((x) => (x.onclick = () => {
@@ -175,7 +196,7 @@ function dessinerProposition(zone, el) {
   zone.querySelectorAll('[data-format]').forEach((x) => (x.onclick = (ev) => {
     ev.stopPropagation();
     const e = p[+x.dataset.format];
-    editeurSchema({ titre: exo(e.exId).n, series: e.series.length, reps: e.series[0].reps }, (sch) => {
+    editeurSchema({ titre: exo(e.exId).n, series: e.series.length, reps: e.series[0].reps, unite: colonnes(exo(e.exId)).mode === 'gainage' ? 'sec' : 'reps' }, (sch) => {
       e.series = Array.from({ length: sch.series }, () => ({ reps: sch.reps, kg: 0, faite: false }));
       dessinerProposition(zone, el);
     });
@@ -220,7 +241,131 @@ function demarrer(exercices) {
     };
   });
   brouillon.proposition = null;
+  brouillon.modeleId = null;
+  brouillon.datePrevue = null;
   window.scrollTo(0, 0);
+}
+
+// =====================================================================
+// Séances enregistrées à l'avance
+// =====================================================================
+
+const modele = (id) => (etat.modeles || []).find((m) => m.id === id);
+
+/** Séances prévues d'abord (par date), puis les autres par nom. */
+export function modelesTries() {
+  return [...(etat.modeles || [])].sort((a, b) => {
+    if (a.date && b.date) return a.date.localeCompare(b.date);
+    if (a.date || b.date) return a.date ? -1 : 1;
+    return a.nom.localeCompare(b.nom, 'fr');
+  });
+}
+
+export function quand(d) {
+  const auj = jour();
+  const demain = new Date(); demain.setDate(demain.getDate() + 1);
+  if (d === auj) return 'aujourd’hui';
+  if (d === jour(demain)) return 'demain';
+  return d < auj ? `le ${dateCourte(d)} (en retard)` : `le ${dateCourte(d)}`;
+}
+
+/** Ouvre la préparation pour composer une séance à faire un jour donné. */
+export function planifierPour(date) {
+  brouillon.datePrevue = date;
+  brouillon.modeleId = null;
+  brouillon.proposition = brouillon.proposition || [];
+  aller('seance');
+}
+
+function nomParDefaut() {
+  const types = [...brouillon.types];
+  return types.length ? types.map(nomGroupe).join(' · ') : 'Ma séance';
+}
+
+function enregistrerModele(el) {
+  const existant = modele(brouillon.modeleId);
+  ouvrirFeuille((f, fermer) => {
+    f.innerHTML = `<h2>💾 ${existant ? 'Mettre à jour la séance' : 'Enregistrer la séance'}</h2>
+      <div class="pile">
+        <label class="champ">Nom<input type="text" id="m-nom" maxlength="60" value="${esc(existant?.nom || nomParDefaut())}"></label>
+        <label class="champ">Prévue le (facultatif)<input type="date" id="m-date" min="${jour()}" value="${esc(existant?.date || brouillon.datePrevue || '')}"></label>
+        <p class="tres-discret" style="margin:0">Les charges seront reprises de ta dernière fois au moment de démarrer.</p>
+        <button class="btn btn-principal btn-plein" id="m-ok">Enregistrer</button>
+      </div>`;
+    f.querySelector('#m-ok').onclick = () => {
+      const nom = f.querySelector('#m-nom').value.trim() || nomParDefaut();
+      const date = f.querySelector('#m-date').value || null;
+      const donnees = {
+        nom, date, types: [...brouillon.types], dureeVisee: brouillon.minutes,
+        exercices: brouillon.proposition.map((x) => ({ exId: x.exId, series: x.series.map((y) => ({ reps: y.reps, kg: 0, faite: false })) })),
+      };
+      maj((e) => {
+        e.modeles = e.modeles || [];
+        const m = e.modeles.find((x) => x.id === brouillon.modeleId);
+        if (m) Object.assign(m, donnees);
+        else e.modeles.push({ id: uid(), creeLe: new Date().toISOString(), ...donnees });
+      }, { silencieux: true });
+      fermer();
+      toast(date ? `Séance prévue ${quand(date)} 📅` : 'Séance enregistrée 💾');
+      brouillon.proposition = null;
+      brouillon.modeleId = null;
+      brouillon.datePrevue = null;
+      afficherPreparation(el);
+      window.scrollTo(0, 0);
+    };
+  });
+}
+
+function menuModele(id, el) {
+  const m = modele(id);
+  if (!m) return;
+  ouvrirFeuille((f, fermer) => {
+    f.innerHTML = `<h2>${esc(m.nom)}</h2>
+      <p class="discret">${m.exercices.map((x) => esc(exo(x.exId)?.n || x.exId)).join(' · ')}</p>
+      <div class="pile">
+        <button class="btn btn-principal btn-plein" data-m="go">▶ Démarrer maintenant</button>
+        <button class="btn btn-plein" data-m="modif">✎ Modifier les exercices</button>
+        <label class="champ">Prévue le<input type="date" id="m-date2" min="${jour()}" value="${esc(m.date || '')}"></label>
+        <button class="btn btn-plein btn-danger" data-m="suppr">${ICONES.poubelle} Supprimer</button>
+      </div>`;
+    f.querySelector('#m-date2').onchange = (ev) => {
+      maj((e) => { const x = e.modeles.find((y) => y.id === id); if (x) x.date = ev.target.value || null; }, { silencieux: true });
+      toast(ev.target.value ? `Prévue ${quand(ev.target.value)} 📅` : 'Date retirée');
+      afficherPreparation(el);
+    };
+    f.querySelectorAll('[data-m]').forEach((b) => (b.onclick = async () => {
+      const a = b.dataset.m;
+      if (a === 'go') { fermer(); return demarrerModele(id); }
+      if (a === 'modif') {
+        fermer();
+        brouillon.modeleId = id;
+        brouillon.types = new Set(m.types);
+        brouillon.minutes = m.dureeVisee || brouillon.minutes;
+        brouillon.proposition = m.exercices.map((x) => ({ exId: x.exId, series: x.series.map((y) => ({ ...y })) }));
+        afficherPreparation(el);
+        el.querySelector('#proposition').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+      if (a === 'suppr') {
+        fermer();
+        if (!(await confirmer(`Supprimer « ${m.nom} » ?`, { ok: 'Supprimer', danger: true }))) return;
+        maj((e) => (e.modeles = e.modeles.filter((x) => x.id !== id)));
+      }
+    }));
+  });
+}
+
+/** Démarre une séance enregistrée (depuis la préparation, l'accueil ou le calendrier). */
+export function demarrerModele(id) {
+  const m = modele(id);
+  if (!m || etat.enCours) return;
+  brouillon.types = new Set(m.types);
+  brouillon.minutes = m.dureeVisee || 60;
+  const exercices = m.exercices.filter((x) => exo(x.exId)).map((x) => ({ exId: x.exId, series: x.series.map((y) => ({ ...y })) }));
+  // Une séance prévue aujourd'hui (ou en retard) est considérée comme faite : on retire sa date.
+  if (m.date && m.date <= jour()) maj((e) => (e.modeles.find((x) => x.id === id).date = null), { silencieux: true });
+  demarrer(exercices);
+  aller('seance');
 }
 
 /** Ajoute un exercice à la séance en cours (utilisé aussi depuis la fiche exercice). */
@@ -303,6 +448,10 @@ function afficherEnCours(el) {
     }
   }));
   el.querySelector('#repos').onclick = choisirRepos;
+  el.querySelectorAll('[data-chrono]').forEach((b) => (b.onclick = () => {
+    const [i, j] = b.dataset.chrono.split(':').map(Number);
+    lancerMinuteurSerie(i, j);
+  }));
   el.querySelectorAll('[data-plus-serie]').forEach((b) => (b.onclick = () => maj((e) => {
     const series = e.enCours.exercices[+b.dataset.plusSerie].series;
     const der = series[series.length - 1] || { reps: 10, kg: 0 };
@@ -373,12 +522,13 @@ function carteEnCours(e, i, n) {
       ${boutonFini}
     </div>
     <table class="series">
-      <thead><tr><th>Série</th>${col.kg ? `<th>${col.kg}</th>` : ''}<th>${col.reps}</th><th></th></tr></thead>
+      <thead><tr><th>Série</th>${col.kg ? `<th>${col.kg}</th>` : ''}<th>${col.reps}</th>${enSecondes(ex) ? '<th></th>' : ''}<th></th></tr></thead>
       <tbody>
         ${e.series.map((x, j) => `<tr class="${x.faite ? 'faite' : ''}">
           <td>${j + 1}</td>
           ${col.kg ? `<td><input type="text" inputmode="decimal" data-champ="${i}:${j}:kg" value="${fmt(x.kg)}" placeholder="0"></td>` : ''}
           <td><input type="text" inputmode="numeric" data-champ="${i}:${j}:reps" value="${fmt(x.reps)}" placeholder="0"></td>
+          ${enSecondes(ex) ? `<td style="width:50px"><button class="coche btn-chrono" data-chrono="${i}:${j}" aria-label="Lancer le minuteur">▶</button></td>` : ''}
           <td style="width:50px"><button class="coche ${x.faite ? 'ok' : ''}" data-coche="${i}:${j}" aria-label="Valider la série">${ICONES.coche}</button></td>
         </tr>`).join('')}
       </tbody>
@@ -397,7 +547,7 @@ function menuExercice(i) {
     el.innerHTML = `<h2>${esc(ex.n)}</h2>
       <div class="pile">
         <button class="btn btn-plein" data-a="voir">Voir comment faire l'exercice</button>
-        ${colonnes(ex).mode === 'muscu' ? '<button class="btn btn-plein" data-a="format">✎ Séries & répétitions</button>' : ''}
+        ${['muscu', 'gainage'].includes(colonnes(ex).mode) ? `<button class="btn btn-plein" data-a="format">✎ Séries & ${colonnes(ex).mode === 'gainage' ? 'durée' : 'répétitions'}</button>` : ''}
         <button class="btn btn-plein" data-a="remplacer">${ICONES.echange} Remplacer (machine prise…)</button>
         ${i > 0 ? `<button class="btn btn-plein" data-a="monter">${ICONES.haut} Monter</button>` : ''}
         ${i < s.exercices.length - 1 ? `<button class="btn btn-plein" data-a="descendre">${ICONES.bas} Descendre</button>` : ''}
@@ -410,7 +560,7 @@ function menuExercice(i) {
       if (a === 'format') {
         const series = s.exercices[i].series;
         const restante = series.find((x) => !x.faite) || series[series.length - 1];
-        return editeurSchema({ titre: ex.n, series: series.length, reps: restante?.reps || 10 }, (sch) => maj((e) => {
+        return editeurSchema({ titre: ex.n, series: series.length, reps: restante?.reps || 10, unite: colonnes(ex).mode === 'gainage' ? 'sec' : 'reps' }, (sch) => maj((e) => {
           const l = e.enCours.exercices[i].series;
           // Les séries déjà validées ne bougent pas ; les autres prennent les nouvelles répétitions.
           l.forEach((x) => { if (!x.faite) x.reps = sch.reps; });
@@ -631,4 +781,103 @@ function choisirRepos() {
     el.querySelector('#chrono-libre').onclick = () => { fermer(); lancerChrono(); };
     el.querySelector('#auto').onchange = (ev) => maj((e) => (e.reglages.reposAuto = ev.target.checked), { silencieux: true });
   });
+}
+
+// =====================================================================
+// Minuteur de gainage / étirement (séries en secondes)
+// =====================================================================
+
+let minuteurSerie = null;
+
+function tic(frequence = 660, dureeSon = 0.09) {
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.frequency.value = frequence;
+    g.gain.setValueAtTime(0.22, audio.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + dureeSon);
+    o.connect(g).connect(audio.destination);
+    o.start();
+    o.stop(audio.currentTime + dureeSon + 0.02);
+  } catch { /* pas de son */ }
+}
+
+function lancerMinuteurSerie(i, j) {
+  const e = etat.enCours?.exercices[i];
+  if (!e || minuteurSerie) return;
+  debloquerAudio();
+  arreterRepos();
+  const ex = exo(e.exId);
+  const m = {
+    i, j, cible: Math.max(1, Math.round(e.series[j].reps || 30)), phase: 'pret', debut: Date.now(),
+    ecoule: 0, enPause: false, dernierDecompte: null, wake: null,
+  };
+  minuteurSerie = m;
+  try { navigator.wakeLock?.request('screen').then((w) => { if (minuteurSerie === m) m.wake = w; else w.release(); }).catch(() => {}); } catch { /* rien */ }
+
+  const el = document.createElement('div');
+  el.className = 'minuteur-gainage';
+  el.innerHTML = `
+    <button class="mg-fermer" data-mg="annuler" aria-label="Annuler">✕</button>
+    <div class="mg-titre">${esc(ex?.n || '')}</div>
+    <div class="mg-sous">Série ${j + 1} · objectif <span class="mg-cible"></span> s</div>
+    <div class="mg-cercle"><div><span class="mg-temps"></span><small class="mg-etat"></small></div></div>
+    <div class="mg-boutons">
+      <button class="btn" data-mg="pause">⏸ Pause</button>
+      <button class="btn" data-mg="plus">+10 s</button>
+    </div>
+    <button class="btn btn-principal mg-stop" data-mg="stop">J’arrête (enregistrer mon temps)</button>`;
+  document.body.append(el);
+  m.el = el;
+
+  const tempsEffort = () => m.ecoule + (m.phase === 'effort' && !m.enPause ? (Date.now() - m.debut) / 1000 : 0);
+
+  const dessiner = () => {
+    if (minuteurSerie !== m) return;
+    el.querySelector('.mg-cible').textContent = m.cible;
+    if (m.phase === 'pret') {
+      const reste = 3 - Math.floor((Date.now() - m.debut) / 1000);
+      if (reste <= 0) { m.phase = 'effort'; m.debut = Date.now(); tic(990, 0.25); vibrer(150); return dessiner(); }
+      if (reste !== m.dernierDecompte) { m.dernierDecompte = reste; tic(); }
+      el.querySelector('.mg-temps').textContent = reste;
+      el.querySelector('.mg-etat').textContent = 'Prêt ?';
+      el.querySelector('.mg-cercle').style.setProperty('--p', 0);
+      return;
+    }
+    const t = tempsEffort();
+    const reste = Math.max(0, Math.ceil(m.cible - t));
+    el.querySelector('.mg-temps').textContent = reste >= 60 ? `${Math.floor(reste / 60)}:${String(reste % 60).padStart(2, '0')}` : reste;
+    el.querySelector('.mg-etat').textContent = m.enPause ? 'En pause' : 'Tiens bon 💪';
+    el.querySelector('.mg-cercle').style.setProperty('--p', Math.min(100, (t / m.cible) * 100));
+    el.querySelector('[data-mg="pause"]').textContent = m.enPause ? '▶ Reprendre' : '⏸ Pause';
+    if (!m.enPause && reste <= 3 && reste > 0 && reste !== m.dernierDecompte) { m.dernierDecompte = reste; tic(); }
+    if (t >= m.cible) finir(m.cible, true);
+  };
+
+  const finir = (tenu, complet) => {
+    if (minuteurSerie !== m) return;
+    clearInterval(m.timer);
+    minuteurSerie = null;
+    el.remove();
+    try { m.wake?.release(); } catch { /* rien */ }
+    if (tenu >= 1) {
+      maj((d) => { const x = d.enCours?.exercices[i]?.series[j]; if (x) { x.reps = Math.round(tenu); x.faite = true; } });
+      if (complet) { bip(); vibrer([200, 100, 200]); }
+      toast(complet ? `Bravo, ${Math.round(tenu)} s tenues 💪` : `${Math.round(tenu)} s enregistrées`);
+      if (etat.reglages.reposAuto !== false) lancerRepos(etat.reglages.repos || 90);
+    }
+  };
+
+  el.querySelectorAll('[data-mg]').forEach((b) => (b.onclick = () => {
+    const a = b.dataset.mg;
+    if (a === 'annuler') return finir(0, false);
+    if (a === 'stop') return finir(m.phase === 'effort' ? Math.floor(tempsEffort()) : 0, false);
+    if (a === 'plus') { m.cible += 10; return dessiner(); }
+    if (a === 'pause' && m.phase === 'effort') {
+      if (m.enPause) { m.enPause = false; m.debut = Date.now(); } else { m.ecoule = tempsEffort(); m.enPause = true; }
+      dessiner();
+    }
+  }));
+  dessiner();
+  m.timer = setInterval(dessiner, 200);
 }

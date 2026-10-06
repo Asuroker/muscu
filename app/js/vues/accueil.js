@@ -8,6 +8,7 @@ import { totalCalories } from '../calories.js';
 import { ajouterPoids, exporter, joursDepuisSauvegarde } from './progres.js';
 import { ajouterSeanceManuelle } from './calendrier.js';
 import { carteObjectifPoids } from './objectifs.js';
+import { demarrerModele, quand } from './seance.js';
 import { besoins, OBJECTIFS_NUTRI, RECETTES, TYPES_REPAS, imageRecette } from '../nutrition.js';
 
 export function carteNiveau() {
@@ -40,6 +41,9 @@ export function afficher(el) {
   const statut = sf ? statutOuverture(sf.horaires) : null;
   const poids = [...etat.poids].sort((a, b) => a.date.localeCompare(b.date));
   const dernierPoids = poids[poids.length - 1];
+  // Séance prévue : d'abord celles d'aujourd'hui ou en retard, sinon la prochaine.
+  const datees = (etat.modeles || []).filter((m) => m.date).sort((a, b) => a.date.localeCompare(b.date));
+  const prevue = datees.find((m) => m.date <= jour()) || datees[0] || null;
 
   el.innerHTML = `
     ${etat.profil?.prenom ? `<div style="font-size:20px;font-weight:750;margin:0 2px 10px">Salut ${esc(etat.profil.prenom)} 👋</div>` : ''}
@@ -51,6 +55,13 @@ export function afficher(el) {
       <div class="flex1"><div style="font-weight:700">${bons.length} bon${bons.length > 1 ? 's' : ''} à utiliser</div>
       <div class="discret">${esc(bons.map((b) => b.titre).slice(0, 2).join(', '))}${bons.length > 2 ? '…' : ''}</div></div>
       ${ICONES.chevron}
+    </div>` : ''}
+
+    ${prevue ? `<div class="carte" style="margin-top:12px;border-color:var(--accent)">
+      <div class="tres-discret">📅 Séance prévue ${quand(prevue.date)}</div>
+      <div style="font-weight:750;font-size:17px">${esc(prevue.nom)}</div>
+      <div class="discret">${prevue.exercices.length} exercice${prevue.exercices.length > 1 ? 's' : ''}</div>
+      ${prevue.date <= jour() && !etat.enCours ? '<button class="btn btn-principal btn-plein" id="go-prevue" style="margin-top:10px">▶ Démarrer cette séance</button>' : ''}
     </div>` : ''}
 
     <div class="pile" style="margin-top:14px">
@@ -132,6 +143,8 @@ export function afficher(el) {
   el.querySelectorAll('[data-aller]').forEach((b) => (b.onclick = (ev) => { ev.stopPropagation(); aller(b.dataset.aller); }));
   document.querySelectorAll('#actions-haut [data-aller]').forEach((b) => (b.onclick = () => aller(b.dataset.aller)));
   el.querySelector('#pesee').onclick = () => ajouterPoids();
+  const goPrevue = el.querySelector('#go-prevue');
+  if (goPrevue) goPrevue.onclick = () => demarrerModele(prevue.id);
   const sauv = el.querySelector('#sauvegarder');
   if (sauv) {
     sauv.onclick = () => exporter();
