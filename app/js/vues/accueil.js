@@ -1,11 +1,11 @@
-import { etat, esc, jour, duree, kg, salle, seancesTriees, dateCourte } from '../store.js';
+import { etat, maj, esc, jour, duree, kg, salle, seancesTriees, dateCourte } from '../store.js';
 import { entete, aller } from '../nav.js';
 import { niveauActuel, titreNiveau, seancesSemaine, serieSemaines } from '../xp.js';
 import { statutOuverture } from '../salles.js';
 import { nomGroupe } from '../exercices.js';
 import { ICONES } from '../ui.js';
 import { totalCalories } from '../calories.js';
-import { ajouterPoids } from './progres.js';
+import { ajouterPoids, exporter, joursDepuisSauvegarde } from './progres.js';
 import { ajouterSeanceManuelle } from './calendrier.js';
 
 export function carteNiveau() {
@@ -40,6 +40,7 @@ export function afficher(el) {
   const dernierPoids = poids[poids.length - 1];
 
   el.innerHTML = `
+    ${bandeauSauvegarde()}
     ${carteNiveau()}
 
     ${bons.length ? `<div class="bon cliquable" style="margin-top:10px" data-aller="recompenses">
@@ -103,8 +104,33 @@ export function afficher(el) {
   el.querySelectorAll('[data-aller]').forEach((b) => (b.onclick = () => aller(b.dataset.aller)));
   document.querySelectorAll('#actions-haut [data-aller]').forEach((b) => (b.onclick = () => aller(b.dataset.aller)));
   el.querySelector('#pesee').onclick = () => ajouterPoids();
+  const sauv = el.querySelector('#sauvegarder');
+  if (sauv) {
+    sauv.onclick = () => exporter();
+    el.querySelector('#plus-tard').onclick = () => maj((e) => (e.rappelSauvegardeReporte = jour()));
+  }
   const v = el.querySelector('#visite');
   if (v) v.onclick = () => ajouterSeanceManuelle(jour());
+}
+
+/** Rappel si la dernière sauvegarde date de plus de 7 jours (ou n'a jamais été faite). */
+function bandeauSauvegarde() {
+  const aDesDonnees = etat.seances.length || etat.poids.length;
+  const j = joursDepuisSauvegarde();
+  if (!aDesDonnees || (j !== null && j < 7) || etat.rappelSauvegardeReporte === jour()) return '';
+  return `<div class="carte" style="margin-bottom:12px;border-color:var(--or);background:var(--or-doux)">
+    <div class="ligne" style="align-items:flex-start">
+      <div style="font-size:28px">💾</div>
+      <div class="flex1">
+        <div style="font-weight:750">${j === null ? 'Sauvegarde tes données' : `Dernière sauvegarde il y a ${j} jours`}</div>
+        <div class="discret">Tes séances sont seulement sur ce téléphone. Enregistre une copie dans <strong>Fichiers › iCloud Drive</strong>.</div>
+      </div>
+    </div>
+    <div class="ligne" style="margin-top:10px">
+      <button class="btn btn-or flex1" id="sauvegarder">Sauvegarder maintenant</button>
+      <button class="btn" id="plus-tard">Plus tard</button>
+    </div>
+  </div>`;
 }
 
 function evolution(poids) {
