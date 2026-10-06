@@ -1,9 +1,9 @@
 // Service worker : l'app fonctionne hors ligne, les photos d'exercices déjà vues restent en cache.
-const VERSION = 'muscu-v7';
+const VERSION = 'muscu-v8';
 const IMAGES = 'muscu-images-v1';
 const COQUILLE = [
   './', './index.html', './css/app.css', './manifest.webmanifest', './data/exercices.json',
-  './js/main.js', './js/nav.js', './js/store.js', './js/xp.js', './js/exercices.js', './js/salles.js', './js/ui.js', './js/calories.js', './js/nutrition.js', './js/recettes.js', './js/objectifs.js',
+  './js/main.js', './js/nav.js', './js/store.js', './js/xp.js', './js/exercices.js', './js/salles.js', './js/ui.js', './js/calories.js', './js/nutrition.js', './js/recettes.js', './js/recettes-2.js', './js/objectifs.js',
   './js/vues/accueil.js', './js/vues/calendrier.js', './js/vues/seance.js', './js/vues/bibliotheque.js',
   './js/vues/progres.js', './js/vues/salles.js', './js/vues/recompenses.js', './js/vues/objectifs.js', './js/vues/nutrition.js',
   './icons/apple-touch-icon.png', './icons/icon-192.png', './icons/icon-512.png',
