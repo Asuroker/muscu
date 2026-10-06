@@ -1,7 +1,7 @@
 import { etat, maj, esc, uid, jour, heure, duree, salle, dernieresSeries } from '../store.js';
 import { entete, aller, chrono } from '../nav.js';
 import {
-  GROUPES, MODELES, exo, image, colonnes, texteSerie, genererSeance, candidats, famille, seriesParDefaut, nbExercicesPour,
+  GROUPES, MODELES, FORMATS, exo, image, colonnes, texteSerie, genererSeance, candidats, famille, seriesParDefaut, nbExercicesPour,
 } from '../exercices.js';
 import { calculerXpSeance, ajouterXp } from '../xp.js';
 import { caloriesSeance } from '../calories.js';
@@ -17,6 +17,45 @@ export function afficher(el) {
   return etat.enCours ? afficherEnCours(el) : afficherPreparation(el);
 }
 
+/** Format séries × répétitions choisi (null = automatique). */
+const schemaActuel = () => etat.reglages.schema || null;
+const memeSchema = (a, b) => (!a && !b) || (a && b && a.series === b.series && a.reps === b.reps);
+
+/** Feuille de réglage « séries × répétitions ». */
+function editeurSchema({ titre, series, reps }, valider) {
+  const v = { series, reps };
+  const borne = (k, x) => Math.max(1, Math.min(k === 'series' ? 10 : 50, Math.round(x) || 1));
+  ouvrirFeuille((el, fermer) => {
+    const dessiner = () => {
+      el.innerHTML = `<h2>${esc(titre)}</h2>
+        <div class="pile">
+          ${[['series', 'Séries'], ['reps', 'Répétitions par série']].map(([k, lib]) => `
+            <div class="ligne-entre">
+              <strong>${lib}</strong>
+              <span class="ligne" style="gap:8px">
+                <button class="btn btn-icone" data-moins="${k}" aria-label="Moins">−</button>
+                <input type="number" inputmode="numeric" data-champ-schema="${k}" value="${v[k]}" style="width:64px;text-align:center;font-weight:800">
+                <button class="btn btn-icone" data-plus="${k}" aria-label="Plus">+</button>
+              </span>
+            </div>`).join('')}
+          <div class="puces">${[5, 6, 8, 10, 12, 15, 20].map((n) => `<button class="puce ${v.reps === n ? 'active' : ''}" data-r="${n}">${n} reps</button>`).join('')}</div>
+          <div class="centre" style="font-size:28px;font-weight:850">${v.series} × ${v.reps}</div>
+          <button class="btn btn-principal btn-plein" id="schema-ok">Valider</button>
+        </div>`;
+      el.querySelectorAll('[data-moins]').forEach((b) => (b.onclick = () => { const k = b.dataset.moins; v[k] = borne(k, v[k] - 1); dessiner(); }));
+      el.querySelectorAll('[data-plus]').forEach((b) => (b.onclick = () => { const k = b.dataset.plus; v[k] = borne(k, v[k] + 1); dessiner(); }));
+      el.querySelectorAll('[data-champ-schema]').forEach((i) => (i.onchange = () => { const k = i.dataset.champSchema; v[k] = borne(k, +i.value); dessiner(); }));
+      el.querySelectorAll('[data-r]').forEach((b) => (b.onclick = () => { v.reps = +b.dataset.r; dessiner(); }));
+      el.querySelector('#schema-ok').onclick = () => {
+        el.querySelectorAll('[data-champ-schema]').forEach((i) => { const k = i.dataset.champSchema; v[k] = borne(k, +i.value); });
+        fermer();
+        valider({ series: v.series, reps: v.reps });
+      };
+    };
+    dessiner();
+  });
+}
+
 // =====================================================================
 // Préparation
 // =====================================================================
@@ -25,6 +64,7 @@ function afficherPreparation(el) {
   entete('Nouvelle séance');
   if (brouillon.salleId === undefined) brouillon.salleId = etat.salleParDefaut;
   const b = brouillon;
+  const perso = schemaActuel() && !FORMATS.some((f) => memeSchema(f.schema, schemaActuel())) ? schemaActuel() : null;
 
   el.innerHTML = `
     <h2>Que veux-tu travailler ?</h2>
@@ -35,6 +75,12 @@ function afficherPreparation(el) {
     <h2>Durée</h2>
     <div class="puces">${[30, 45, 60, 75, 90, 120].map((m) => `<button class="puce ${b.minutes === m ? 'active' : ''}" data-min="${m}">${duree(m)}</button>`).join('')}</div>
     <p class="tres-discret" style="margin-top:6px">≈ ${nbExercicesPour(b.minutes)} exercices</p>
+
+    <h2>Séries & répétitions</h2>
+    <div class="puces">
+      ${FORMATS.map((f) => `<button class="puce ${memeSchema(f.schema, schemaActuel()) ? 'active' : ''}" data-format-global="${f.id}">${f.nom} <span style="opacity:.7">${f.detail}</span></button>`).join('')}
+      <button class="puce ${perso ? 'active' : ''}" id="format-perso">✎ ${perso ? `Perso ${perso.series} × ${perso.reps}` : 'Perso…'}</button>
+    </div>
 
     <h2>Matériel</h2>
     <div class="puces">
@@ -63,15 +109,29 @@ function afficherPreparation(el) {
   }));
   el.querySelectorAll('[data-modele]').forEach((x) => (x.onclick = () => {
     b.types = new Set(MODELES[x.dataset.modele].groupes);
-    b.proposition = genererSeance([...b.types], b.minutes, b.materiel);
+    b.proposition = genererSeance([...b.types], b.minutes, b.materiel, schemaActuel());
     afficherPreparation(el);
   }));
   el.querySelectorAll('[data-min]').forEach((x) => (x.onclick = () => { b.minutes = +x.dataset.min; afficherPreparation(el); }));
   el.querySelectorAll('[data-mat]').forEach((x) => (x.onclick = () => { b.materiel = x.dataset.mat; afficherPreparation(el); }));
+  const choisirFormat = (schema) => {
+    maj((e) => { if (schema) e.reglages.schema = schema; else delete e.reglages.schema; }, { silencieux: true });
+    // Applique le format aux exercices de musculation déjà proposés.
+    (b.proposition || []).forEach((p) => {
+      const ex = exo(p.exId);
+      if (colonnes(ex).mode === 'muscu') p.series = seriesParDefaut(ex, 15, schema);
+    });
+    afficherPreparation(el);
+  };
+  el.querySelectorAll('[data-format-global]').forEach((x) => (x.onclick = () => choisirFormat(FORMATS.find((f) => f.id === x.dataset.formatGlobal).schema)));
+  el.querySelector('#format-perso').onclick = () => editeurSchema(
+    { titre: 'Mon format', ...(schemaActuel() || { series: 4, reps: 10 }) },
+    (schema) => choisirFormat(schema),
+  );
   const sel = el.querySelector('#salle');
   if (sel) sel.onchange = () => (b.salleId = sel.value || null);
   el.querySelector('#generer').onclick = () => {
-    b.proposition = genererSeance([...b.types], b.minutes, b.materiel);
+    b.proposition = genererSeance([...b.types], b.minutes, b.materiel, schemaActuel());
     afficherPreparation(el);
     el.querySelector('#proposition').scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -90,7 +150,10 @@ function dessinerProposition(zone, el) {
         ${image(ex) ? `<img class="vignette" src="${image(ex)}" alt="" loading="lazy" data-voir="${ex.id}">` : '<div class="vignette vide"></div>'}
         <div class="flex1" data-voir="${ex.id}" style="cursor:pointer">
           <div class="titre">${esc(ex.n)}</div>
-          <div class="sous">${e.series.length} × ${e.series[0].reps} ${col.reps.toLowerCase()} · ${esc(nomMuscle(ex))}</div>
+          <div class="sous">${esc(nomMuscle(ex))}</div>
+          ${col.mode === 'muscu'
+            ? `<button class="btn btn-petit" data-format="${i}" style="margin-top:6px;min-height:32px">${e.series.length} × ${e.series[0].reps} reps ✎</button>`
+            : `<div class="sous">${e.series.length} × ${e.series[0].reps} ${col.reps.toLowerCase()}</div>`}
         </div>
         <button class="btn btn-icone" data-echanger="${i}" aria-label="Changer d'exercice">${ICONES.echange}</button>
         <button class="btn btn-icone" data-retirer="${i}" aria-label="Retirer">${ICONES.poubelle}</button>
@@ -106,10 +169,18 @@ function dessinerProposition(zone, el) {
     const actuel = exo(p[i].exId);
     const nouveau = remplacant(actuel, p.map((e) => e.exId));
     if (!nouveau) return toast('Pas d’autre exercice similaire');
-    p[i] = { exId: nouveau.id, series: seriesParDefaut(nouveau) };
+    p[i] = { exId: nouveau.id, series: seriesParDefaut(nouveau, 15, schemaActuel()) };
     dessinerProposition(zone, el);
   }));
-  zone.querySelector('#ajouter-ex').onclick = () => choisirExercice((ex) => { p.push({ exId: ex.id, series: seriesParDefaut(ex) }); dessinerProposition(zone, el); });
+  zone.querySelectorAll('[data-format]').forEach((x) => (x.onclick = (ev) => {
+    ev.stopPropagation();
+    const e = p[+x.dataset.format];
+    editeurSchema({ titre: exo(e.exId).n, series: e.series.length, reps: e.series[0].reps }, (sch) => {
+      e.series = Array.from({ length: sch.series }, () => ({ reps: sch.reps, kg: 0, faite: false }));
+      dessinerProposition(zone, el);
+    });
+  }));
+  zone.querySelector('#ajouter-ex').onclick = () => choisirExercice((ex) => { p.push({ exId: ex.id, series: seriesParDefaut(ex, 15, schemaActuel()) }); dessinerProposition(zone, el); });
   zone.querySelector('#demarrer').onclick = () => demarrer(p);
 }
 
@@ -129,14 +200,12 @@ function remplacant(ex, exclus) {
   return pool[Math.floor(Math.random() * pool.length)] || null;
 }
 
-/** Pré-remplit les charges avec celles de la dernière fois. */
+/** Garde les séries et répétitions prévues, et reprend les charges de la dernière fois. */
 function prerempli(e) {
   const avant = dernieresSeries(e.exId);
-  if (!avant) return e.series.map((s) => ({ ...s, faite: false }));
-  const n = Math.max(e.series.length, avant.length);
-  return Array.from({ length: n }, (_, i) => {
-    const ref = avant[i] || avant[avant.length - 1];
-    return { reps: ref.reps, kg: ref.kg || 0, faite: false };
+  return e.series.map((s, i) => {
+    const ref = avant ? avant[i] || avant[avant.length - 1] : null;
+    return { reps: s.reps, kg: ref ? ref.kg || 0 : s.kg || 0, faite: false };
   });
 }
 
@@ -157,7 +226,7 @@ function demarrer(exercices) {
 /** Ajoute un exercice à la séance en cours (utilisé aussi depuis la fiche exercice). */
 export function ajouterALaSeance(ex) {
   if (!etat.enCours) return;
-  maj((e) => e.enCours.exercices.push({ exId: ex.id, series: prerempli({ exId: ex.id, series: seriesParDefaut(ex) }) }));
+  maj((e) => e.enCours.exercices.push({ exId: ex.id, series: prerempli({ exId: ex.id, series: seriesParDefaut(ex, 15, schemaActuel()) }) }));
   toast('Ajouté à la séance');
 }
 
@@ -328,6 +397,7 @@ function menuExercice(i) {
     el.innerHTML = `<h2>${esc(ex.n)}</h2>
       <div class="pile">
         <button class="btn btn-plein" data-a="voir">Voir comment faire l'exercice</button>
+        ${colonnes(ex).mode === 'muscu' ? '<button class="btn btn-plein" data-a="format">✎ Séries & répétitions</button>' : ''}
         <button class="btn btn-plein" data-a="remplacer">${ICONES.echange} Remplacer (machine prise…)</button>
         ${i > 0 ? `<button class="btn btn-plein" data-a="monter">${ICONES.haut} Monter</button>` : ''}
         ${i < s.exercices.length - 1 ? `<button class="btn btn-plein" data-a="descendre">${ICONES.bas} Descendre</button>` : ''}
@@ -337,9 +407,20 @@ function menuExercice(i) {
       fermer();
       const a = b.dataset.a;
       if (a === 'voir') return aller('exercice/' + ex.id);
+      if (a === 'format') {
+        const series = s.exercices[i].series;
+        const restante = series.find((x) => !x.faite) || series[series.length - 1];
+        return editeurSchema({ titre: ex.n, series: series.length, reps: restante?.reps || 10 }, (sch) => maj((e) => {
+          const l = e.enCours.exercices[i].series;
+          // Les séries déjà validées ne bougent pas ; les autres prennent les nouvelles répétitions.
+          l.forEach((x) => { if (!x.faite) x.reps = sch.reps; });
+          while (l.length < sch.series) l.push({ reps: sch.reps, kg: l[l.length - 1]?.kg || 0, faite: false });
+          while (l.length > sch.series && l.length > 1 && !l[l.length - 1].faite) l.pop();
+        }));
+      }
       if (a === 'remplacer') {
         return choisirExercice((nv) => maj((e) => {
-          e.enCours.exercices[i] = { exId: nv.id, series: prerempli({ exId: nv.id, series: seriesParDefaut(nv) }) };
+          e.enCours.exercices[i] = { exId: nv.id, series: prerempli({ exId: nv.id, series: seriesParDefaut(nv, 15, schemaActuel()) }) };
         }), { groupe: GROUPES.find((g) => g.muscles?.includes(ex.m[0]) || g.categorie === ex.c)?.id });
       }
       maj((e) => {
