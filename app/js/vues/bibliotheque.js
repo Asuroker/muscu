@@ -5,6 +5,7 @@ import {
 } from '../exercices.js';
 import { ICONES, ouvrirFeuille, graphe } from '../ui.js';
 import { ajouterALaSeance } from './seance.js';
+import { htmlFiltreCategorie } from './categories.js';
 import { metExercice, poidsA } from '../calories.js';
 import { ligneObjectifExercice, editerObjectifCharge } from './objectifs.js';
 
@@ -43,10 +44,7 @@ export function afficher(el) {
   entete('Exercices');
   el.innerHTML = `
     <div class="recherche">${ICONES.recherche}<input type="search" id="q" placeholder="Rechercher (développé, curl, presse…)" value="${esc(filtres.texte)}" autocomplete="off"></div>
-    <div class="puces defile" style="margin-top:10px">
-      <button class="puce ${filtres.groupe ? '' : 'active'}" data-g="">Tous</button>
-      ${GROUPES.map((g) => `<button class="puce ${filtres.groupe === g.id ? 'active' : ''}" data-g="${g.id}">${g.emoji} ${g.nom}</button>`).join('')}
-    </div>
+    <div id="filtre-cat" style="margin-top:10px">${htmlFiltreCategorie(filtres.groupe)}</div>
     <div class="ligne" style="margin-top:4px">
       <select id="mat" class="flex1">
         <option value="">Tout le matériel</option>
@@ -67,11 +65,17 @@ export function afficher(el) {
   };
   const relancer = () => {
     resultats = filtrer(filtres);
+    // Muscle sans exercice « essentiel » (ex. cou) : on montre directement tous ses exercices.
+    let tousAffiches = false;
+    if (!resultats.length && filtres.essentiels && !filtres.texte) {
+      resultats = filtrer({ ...filtres, essentiels: false });
+      tousAffiches = resultats.length > 0;
+    }
     affiches = 0;
     res.innerHTML = '';
     res.hidden = !resultats.length;
     compte.textContent = resultats.length
-      ? `${resultats.length} exercice${resultats.length > 1 ? 's' : ''}${filtres.essentiels && !filtres.texte ? ' essentiels · décoche ★ pour voir les 876' : ''}`
+      ? `${resultats.length} exercice${resultats.length > 1 ? 's' : ''}${tousAffiches ? ' (aucun essentiel ici : tous sont affichés)' : filtres.essentiels && !filtres.texte ? ` essentiel${resultats.length > 1 ? 's' : ''} · décoche ★ pour voir les 876` : ''}`
       : 'Aucun exercice ne correspond.';
     plus();
   };
@@ -81,11 +85,14 @@ export function afficher(el) {
   obs.observe(el.querySelector('#fin'));
 
   el.querySelector('#q').oninput = (e) => { filtres.texte = e.target.value; relancer(); };
-  el.querySelectorAll('[data-g]').forEach((b) => (b.onclick = () => {
+  const zoneFiltre = el.querySelector('#filtre-cat');
+  const brancherFiltre = () => zoneFiltre.querySelectorAll('[data-g]').forEach((b) => (b.onclick = () => {
     filtres.groupe = b.dataset.g;
-    el.querySelectorAll('[data-g]').forEach((x) => x.classList.toggle('active', x === b));
+    zoneFiltre.innerHTML = htmlFiltreCategorie(filtres.groupe);
+    brancherFiltre();
     relancer();
   }));
+  brancherFiltre();
   el.querySelector('#mat').onchange = (e) => { filtres.materiel = e.target.value; relancer(); };
   el.querySelector('#ess').onclick = (e) => { filtres.essentiels = !filtres.essentiels; e.currentTarget.classList.toggle('active'); relancer(); };
   return () => obs.disconnect();
@@ -182,10 +189,7 @@ export function choisirExercice(rappel, { groupe = '' } = {}) {
   ouvrirFeuille((el, fermer) => {
     el.innerHTML = `<h2>Choisir un exercice</h2>
       <div class="recherche">${ICONES.recherche}<input type="search" id="pq" placeholder="Rechercher…" autocomplete="off"></div>
-      <div class="puces defile" style="margin-top:10px">
-        <button class="puce ${f.groupe ? '' : 'active'}" data-g="">Tous</button>
-        ${GROUPES.map((g) => `<button class="puce ${f.groupe === g.id ? 'active' : ''}" data-g="${g.id}">${g.emoji} ${g.nom}</button>`).join('')}
-      </div>
+      <div id="pfiltre" style="margin-top:10px">${htmlFiltreCategorie(f.groupe)}</div>
       <div class="liste" id="pres" style="margin-top:6px"></div>`;
     const res = el.querySelector('#pres');
     const relancer = () => {
@@ -199,11 +203,14 @@ export function choisirExercice(rappel, { groupe = '' } = {}) {
       }));
     };
     el.querySelector('#pq').oninput = (e) => { f.texte = e.target.value; relancer(); };
-    el.querySelectorAll('[data-g]').forEach((b) => (b.onclick = () => {
+    const zoneFiltre = el.querySelector('#pfiltre');
+    const brancherFiltre = () => zoneFiltre.querySelectorAll('[data-g]').forEach((b) => (b.onclick = () => {
       f.groupe = b.dataset.g;
-      el.querySelectorAll('[data-g]').forEach((x) => x.classList.toggle('active', x === b));
+      zoneFiltre.innerHTML = htmlFiltreCategorie(f.groupe);
+      brancherFiltre();
       relancer();
     }));
+    brancherFiltre();
     relancer();
   });
 }
