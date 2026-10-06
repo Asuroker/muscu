@@ -26,7 +26,7 @@ def main():
             source = json.loads(r.read().decode("utf-8"))
 
     noms = {**charger("noms_fr_1.json"), **charger("noms_fr_2.json")}
-    consignes = {**charger("consignes_fr_1.json"), **charger("consignes_fr_2.json")}
+    consignes = {**charger("consignes_fr_1.json"), **charger("consignes_fr_2.json"), **charger("consignes_fr_3.json")}
 
     inconnus = [n for n in consignes if n not in {e["name"] for e in source}]
     if inconnus:

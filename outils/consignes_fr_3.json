@@ -1,0 +1,124 @@
+{
+"Dip Machine": [
+  "Assieds-toi dans la machine à dips, choisis la charge et saisis fermement les poignées.",
+  "Garde les coudes près du corps, fléchis à environ 90° au départ.",
+  "Pousse les poignées vers le bas en contractant les triceps, sans verrouiller complètement les coudes.",
+  "Remonte lentement jusqu’à la position de départ."
+],
+"Parallel Bar Dip": [
+  "Place-toi entre les barres parallèles, une main sur chaque barre, et monte bras tendus.",
+  "Garde le buste droit et les coudes près du corps.",
+  "Descends en fléchissant les coudes jusqu’à environ 90°, sans te balancer.",
+  "Remonte en poussant jusqu’à bras tendus."
+],
+"Weighted Bench Dip": [
+  "Place deux bancs parallèles : mains au bord de l’un derrière toi, pieds posés sur l’autre devant toi.",
+  "Fais poser un disque ou un haltère sur tes cuisses (idéalement par un partenaire).",
+  "Descends en fléchissant les coudes jusqu’à environ 90°, coudes vers l’arrière.",
+  "Remonte en poussant sur les mains. Réservé à ceux qui maîtrisent déjà les dips sur banc."
+],
+"Reverse Grip Triceps Pushdown": [
+  "Fixe une barre droite ou EZ à la poulie haute.",
+  "Saisis-la paumes vers le haut (prise inversée), mains à largeur d’épaules, coudes collés au corps.",
+  "Pousse la barre vers le bas jusqu’à bras tendus, seuls les avant-bras bougent.",
+  "Remonte lentement jusqu’à hauteur de poitrine. Commence léger : cette prise sollicite davantage les poignets."
+],
+"Cable One Arm Tricep Extension": [
+  "Saisis une poignée simple à la poulie haute, paume vers le haut.",
+  "Coude collé au corps, avant-bras plié vers le haut.",
+  "Tends le bras vers le bas en contractant le triceps.",
+  "Reviens lentement, puis change de bras. Pratique pour corriger un déséquilibre gauche / droite."
+],
+"Kneeling Cable Triceps Extension": [
+  "Place un banc perpendiculaire devant la poulie haute, avec une barre droite.",
+  "Dos à la machine, mets-toi à genoux et pose l’arrière des bras sur le banc, barre derrière la tête.",
+  "Tends les bras vers l’avant en arc de cercle jusqu’à ce qu’ils soient parallèles au sol.",
+  "Reviens lentement en gardant les coudes serrés près de la tête."
+],
+"Lying Dumbbell Tricep Extension": [
+  "Allonge-toi sur un banc plat, un haltère dans chaque main, bras tendus au-dessus de la poitrine, paumes face à face.",
+  "Sans bouger le haut des bras, descends les haltères de chaque côté de la tête.",
+  "Remonte en contractant les triceps jusqu’à bras tendus."
+],
+"Seated Triceps Press": [
+  "Assis sur un banc avec dossier, tiens un haltère à deux mains au-dessus de la tête, bras tendus.",
+  "Garde les coudes serrés près de la tête.",
+  "Descends l’haltère derrière la tête jusqu’à ce que les avant-bras touchent les biceps.",
+  "Remonte en tendant les bras. Seuls les avant-bras bougent."
+],
+"Standing Overhead Barbell Triceps Extension": [
+  "Debout, tiens une barre (ou une barre EZ) en pronation, mains un peu plus serrées que les épaules.",
+  "Monte la barre au-dessus de la tête, bras tendus, coudes serrés.",
+  "Descends la barre derrière la tête en fléchissant les coudes, haut des bras immobile.",
+  "Remonte en contractant les triceps. Serre les abdos pour ne pas te cambrer."
+],
+"Incline Barbell Triceps Extension": [
+  "Allonge-toi sur un banc incliné (45 à 75°), barre tenue au-dessus de la tête, prise un peu serrée.",
+  "Descends la barre en arc de cercle derrière la tête, coudes fixes et serrés.",
+  "Remonte jusqu’à bras tendus en contractant les triceps.",
+  "L’inclinaison étire davantage le triceps qu’une barre au front classique."
+],
+"Decline EZ Bar Triceps Extension": [
+  "Cale tes jambes sur le banc décliné et allonge-toi, barre EZ tenue bras tendus au-dessus de toi, prise serrée.",
+  "Descends la barre vers le front en fléchissant seulement les coudes.",
+  "Remonte en contractant les triceps. Fais-toi aider pour prendre la barre si elle est lourde."
+],
+"JM Press": [
+  "Allongé sur un banc plat, tiens la barre bras tendus au-dessus du haut de la poitrine, prise serrée, coudes rentrés.",
+  "Descends la barre comme pour une barre au front, puis à mi-course laisse les coudes avancer vers tes pieds pour l’amener vers le menton.",
+  "Pousse pour revenir bras tendus en contractant les triceps.",
+  "Mélange de développé serré et de barre au front : très efficace pour la force des triceps."
+],
+"Tate Press": [
+  "Allongé sur un banc plat, haltères tenus au-dessus de la poitrine, paumes vers tes pieds, coudes ouverts vers l’extérieur.",
+  "Sans bouger le haut des bras, descends les haltères vers le centre de la poitrine en pliant les coudes.",
+  "Les haltères se touchent presque sur la poitrine.",
+  "Remonte en tendant les bras et en contractant les triceps."
+],
+"Close-Grip Dumbbell Press": [
+  "Allongé sur un banc plat, tiens un haltère à deux mains (ou deux haltères serrés l’un contre l’autre) au-dessus de la poitrine.",
+  "Descends lentement jusqu’à la poitrine en gardant les coudes près du corps.",
+  "Pousse jusqu’à bras tendus en contractant les triceps."
+],
+"Smith Machine Close-Grip Bench Press": [
+  "Place un banc plat sous la barre guidée et règle la hauteur pour pouvoir la décrocher bras presque tendus.",
+  "Saisis la barre à largeur d’épaules (prise serrée) et déverrouille-la.",
+  "Descends lentement vers le milieu de la poitrine en gardant les coudes collés au corps.",
+  "Pousse jusqu’à bras tendus. La barre guidée permet de pousser lourd sans partenaire."
+],
+"Standing One-Arm Dumbbell Triceps Extension": [
+  "Debout, tiens un haltère dans une main, bras tendu au-dessus de la tête.",
+  "Garde le coude pointé vers le plafond, près de la tête.",
+  "Descends l’haltère derrière la tête en pliant le coude.",
+  "Remonte en tendant le bras, puis change de côté. L’autre main peut tenir le coude pour le stabiliser."
+],
+"Standing Bent-Over Two-Arm Dumbbell Triceps Extension": [
+  "Un haltère dans chaque main, genoux légèrement fléchis, penche le buste presque à l’horizontale, dos droit.",
+  "Haut des bras collé au corps, coudes pliés à 90°.",
+  "Tends les deux bras vers l’arrière en contractant les triceps, tiens une seconde.",
+  "Reviens lentement à 90°."
+],
+"Cable Lying Triceps Extension": [
+  "Allonge-toi sur un banc plat, tête vers la poulie basse, et saisis la barre droite prise serrée.",
+  "Bras tendus au-dessus de la poitrine.",
+  "Descends la barre vers le front en fléchissant les coudes, haut des bras immobile.",
+  "Remonte en contractant les triceps. La poulie garde la tension sur tout le mouvement."
+],
+"Incline Push-Up Close-Grip": [
+  "Pose les mains côte à côte sur une barre (Smith) ou un banc, à hauteur de taille.",
+  "Recule les pieds, corps bien droit et gainé.",
+  "Descends la poitrine vers la barre en gardant les coudes près du corps.",
+  "Remonte en poussant. Plus la barre est haute, plus c’est facile : idéal pour débuter."
+],
+"Body Tricep Press": [
+  "Place une barre dans le rack à hauteur de poitrine et saisis-la à largeur d’épaules.",
+  "Recule les pieds d’un ou deux pas, bras tendus, corps penché et gainé.",
+  "Fléchis les coudes pour amener le front vers la barre.",
+  "Tends les bras pour revenir. C’est une barre au front au poids du corps : plus tu recules les pieds, plus c’est dur."
+],
+"Triceps Stretch": [
+  "Lève un bras et plie-le pour amener la main derrière la tête.",
+  "Avec l’autre main, attrape le coude et tire-le doucement.",
+  "Tiens 20 à 30 secondes en respirant calmement, puis change de côté."
+]
+}

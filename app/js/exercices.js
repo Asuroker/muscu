@@ -180,9 +180,10 @@ export function genererSeance(groupes, minutes, materiel = 'tout', schema = null
       const cible = c.filter((ex) => ex.m[0] === sousMuscle);
       if (cible.length) c = cible;
     }
-    if (!c.length) c = candidats(groupeId, materiel, false).filter((ex) => !choisis.includes(ex) && !famillesPrises.has(famille(ex)) && ex.l !== 'expert');
-    // Groupes à un seul type de mouvement (biceps = que des curls) : on accepte une autre variante.
+    // Plus de nouveau mouvement parmi les essentiels : on prend une autre variante courante
+    // (ex. biceps = que des curls) plutôt qu'un exercice rare.
     if (!c.length) c = candidats(groupeId, materiel).filter((ex) => !choisis.includes(ex));
+    if (!c.length) c = candidats(groupeId, materiel, false).filter((ex) => !choisis.includes(ex) && !famillesPrises.has(famille(ex)) && ex.l !== 'expert');
     if (!c.length) return null;
     const compos = melanger(c.filter((ex) => ex.k === 'compound'));
     const isos = melanger(c.filter((ex) => ex.k !== 'compound'));
