@@ -109,7 +109,12 @@ export function assainir(brut, base) {
   }
   res.enCours = enCours(d.enCours);
   const reg = objet(d.reglages) || {};
-  res.reglages = { repos: nombre(reg.repos, 10, 900, 90), ...(reg.reposAuto === false ? { reposAuto: false } : {}) };
+  const sch = objet(reg.schema);
+  res.reglages = {
+    repos: nombre(reg.repos, 10, 900, 90),
+    ...(reg.reposAuto === false ? { reposAuto: false } : {}),
+    ...(sch ? { schema: { series: Math.round(nombre(sch.series, 1, 10, 4)), reps: Math.round(nombre(sch.reps, 1, 100, 10)) } } : {}),
+  };
   const o = objet(d.objectifs) || {};
   const op = objet(o.poids);
   res.objectifs = {

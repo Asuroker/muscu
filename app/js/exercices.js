@@ -157,7 +157,7 @@ export const nbExercicesPour = (min) => Math.max(2, Math.min(10, Math.round(min 
  * Propose une séance : liste de {exId, series:[{reps, kg}]}.
  * Les exercices polyarticulaires passent en premier, sans deux variantes du même mouvement.
  */
-export function genererSeance(groupes, minutes, materiel = 'tout') {
+export function genererSeance(groupes, minutes, materiel = 'tout', schema = null) {
   const n = nbExercicesPour(minutes);
   const avecCardio = groupes.includes('cardio');
   const autres = groupes.filter((g) => g !== 'cardio');
@@ -205,13 +205,25 @@ export function genererSeance(groupes, minutes, materiel = 'tout') {
   choisis.sort((a, b) => rang(a) - rang(b));
 
   const minutesCardio = autres.length ? 15 : Math.round(minutes / Math.max(1, choisis.length));
-  return choisis.map((ex) => ({ exId: ex.id, series: seriesParDefaut(ex, minutesCardio) }));
+  return choisis.map((ex) => ({ exId: ex.id, series: seriesParDefaut(ex, minutesCardio, schema) }));
 }
 
-export function seriesParDefaut(ex, minutesCardio = 15) {
+/** Formats séries × répétitions proposés (null = automatique selon l'exercice). */
+export const FORMATS = [
+  { id: 'auto', nom: 'Auto', detail: '4 × 10 / 3 × 12', schema: null },
+  { id: 'force', nom: 'Force', detail: '5 × 5', schema: { series: 5, reps: 5 } },
+  { id: 'muscle', nom: 'Muscle', detail: '4 × 8', schema: { series: 4, reps: 8 } },
+  { id: 'volume', nom: 'Volume', detail: '4 × 12', schema: { series: 4, reps: 12 } },
+  { id: 'endurance', nom: 'Endurance', detail: '3 × 15', schema: { series: 3, reps: 15 } },
+];
+
+/** Séries par défaut d'un exercice ; `schema` = { series, reps } impose un format pour la musculation. */
+export function seriesParDefaut(ex, minutesCardio = 15, schema = null) {
   const mode = colonnes(ex).mode;
   if (mode === 'cardio') return [{ reps: minutesCardio, kg: 0, faite: false }];
   if (mode === 'etirement') return [{ reps: 30, kg: 0, faite: false }, { reps: 30, kg: 0, faite: false }];
   const compose = ex.k === 'compound';
-  return Array.from({ length: compose ? 4 : 3 }, () => ({ reps: compose ? 10 : 12, kg: 0, faite: false }));
+  const n = schema?.series || (compose ? 4 : 3);
+  const reps = schema?.reps || (compose ? 10 : 12);
+  return Array.from({ length: n }, () => ({ reps, kg: 0, faite: false }));
 }
