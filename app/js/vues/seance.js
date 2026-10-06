@@ -5,6 +5,7 @@ import {
 } from '../exercices.js';
 import { calculerXpSeance, ajouterXp } from '../xp.js';
 import { caloriesSeance } from '../calories.js';
+import { verifierCharges } from '../objectifs.js';
 import { ICONES, ouvrirFeuille, confirmer, toast, vibrer } from '../ui.js';
 import { choisirExercice } from './bibliotheque.js';
 import { celebrer } from './recompenses.js';
@@ -382,6 +383,10 @@ function terminer() {
       maj((e) => {
         e.seances.push(seance);
         e.enCours = null;
+        const atteints = verifierCharges(e);
+        calcul.lignes.push(...atteints);
+        calcul.total += atteints.reduce((t, l) => t + l.xp, 0);
+        seance.xp = calcul.total;
         gain = ajouterXp(e, calcul.total, 'Séance', seance.date, { seanceId: seance.id });
       });
       fermer();

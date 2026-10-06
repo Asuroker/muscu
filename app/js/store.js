@@ -4,7 +4,7 @@ const CLE = 'muscu.v1';
 
 function etatInitial() {
   return {
-    version: 1,
+    version: 2,
     creeLe: new Date().toISOString(),
     salles: [],          // {id, nom, marque, ville, adresse, lat, lon, osm, site, horairesOsm, horaires}
     salleParDefaut: null,
@@ -13,13 +13,17 @@ function etatInitial() {
     xp: [],              // {date, montant, raison}
     bons: [],            // {id, titre, emoji, niveau, gagneLe, utiliseLe}
     regles: [            // récompenses par niveau : la plus grande "tous" qui divise le niveau gagne
+      { tous: 15, emoji: '🕹️', titre: 'Un nouveau jeu vidéo au choix' },
       { tous: 10, emoji: '🎮', titre: 'Soirée jeux vidéo illimitée' },
+      { tous: 7, emoji: '💎', titre: 'Acheter un skin / pass de combat' },
       { tous: 5, emoji: '🍔', titre: 'Cheat meal' },
       { tous: 3, emoji: '🍫', titre: 'Snack sucré au choix' },
       { tous: 1, emoji: '🥤', titre: 'Boisson sucrée' },
     ],
     enCours: null,       // séance en cours (même structure qu'une séance + debutTs)
     reglages: { repos: 90 },
+    objectifs: { poids: null, charges: [] },
+    profil: null,
   };
 }
 
@@ -41,6 +45,13 @@ function migrer(e) {
       r.titre = 'Soirée jeux vidéo illimitée';
       r.emoji = '🎮';
     }
+  }
+  // v2 : récompenses gamer ajoutées aux règles par défaut.
+  if ((e.version || 1) < 2) {
+    const titres = new Set((e.regles || []).map((r) => r.titre));
+    if (!titres.has('Un nouveau jeu vidéo au choix')) e.regles.push({ tous: 15, emoji: '🕹️', titre: 'Un nouveau jeu vidéo au choix' });
+    if (!titres.has('Acheter un skin / pass de combat')) e.regles.push({ tous: 7, emoji: '💎', titre: 'Acheter un skin / pass de combat' });
+    e.version = 2;
   }
   return e;
 }
