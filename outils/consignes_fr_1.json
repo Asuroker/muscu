@@ -1,0 +1,352 @@
+{
+"Barbell Bench Press - Medium Grip": [
+  "Allonge-toi sur le banc plat, yeux sous la barre, pieds bien à plat au sol.",
+  "Saisis la barre un peu plus large que les épaules, serre les omoplates et garde une légère cambrure.",
+  "Décroche la barre et place-la au-dessus de la poitrine, bras tendus.",
+  "Inspire et descends la barre de façon contrôlée jusqu'au bas des pectoraux, coudes à environ 45° du corps.",
+  "Pousse la barre vers le haut en expirant jusqu'à tendre les bras, sans décoller les fesses du banc."
+],
+"Barbell Incline Bench Press - Medium Grip": [
+  "Règle le banc entre 30° et 45° et allonge-toi, pieds à plat.",
+  "Saisis la barre un peu plus large que les épaules et serre les omoplates.",
+  "Décroche la barre et descends-la lentement vers le haut de la poitrine.",
+  "Pousse vers le haut jusqu'à bras tendus en gardant les coudes sous la barre."
+],
+"Decline Barbell Bench Press": [
+  "Cale tes jambes sous les boudins du banc décliné et allonge-toi.",
+  "Saisis la barre un peu plus large que les épaules et décroche-la bras tendus.",
+  "Descends la barre lentement vers le bas des pectoraux.",
+  "Pousse la barre vers le haut en expirant. Utilise un partenaire ou des sécurités, la position est instable."
+],
+"Dumbbell Bench Press": [
+  "Assieds-toi sur le banc, haltères sur les cuisses, puis allonge-toi en les amenant au niveau de la poitrine.",
+  "Pousse les haltères au-dessus de la poitrine, paumes vers tes pieds.",
+  "Descends lentement jusqu'à sentir l'étirement des pectoraux, coudes légèrement sous le niveau du banc.",
+  "Remonte en rapprochant légèrement les haltères en haut, sans les cogner."
+],
+"Incline Dumbbell Press": [
+  "Règle le banc à 30–45°, haltères sur les cuisses, puis allonge-toi.",
+  "Amène les haltères à hauteur d'épaules, paumes vers l'avant.",
+  "Pousse vers le haut jusqu'à bras presque tendus.",
+  "Redescends lentement en gardant les omoplates serrées contre le banc."
+],
+"Decline Dumbbell Bench Press": [
+  "Cale tes jambes sur le banc décliné, haltères contre la poitrine.",
+  "Pousse les haltères vers le haut, paumes vers tes pieds.",
+  "Descends lentement jusqu'au bas des pectoraux puis remonte en expirant."
+],
+"Dumbbell Flyes": [
+  "Allonge-toi sur un banc plat, haltères au-dessus de la poitrine, paumes face à face.",
+  "Garde les coudes légèrement fléchis tout au long du mouvement.",
+  "Ouvre les bras en arc de cercle jusqu'à sentir l'étirement des pectoraux.",
+  "Ramène les haltères au-dessus de la poitrine comme si tu enlaçais un arbre."
+],
+"Incline Dumbbell Flyes": [
+  "Règle le banc à 30–45°, haltères au-dessus de la poitrine, paumes face à face.",
+  "Coudes légèrement fléchis, ouvre les bras lentement sur les côtés.",
+  "Arrête quand tu sens l'étirement du haut des pectoraux.",
+  "Remonte en serrant les pectoraux."
+],
+"Cable Crossover": [
+  "Place les poulies en position haute et saisis une poignée dans chaque main.",
+  "Avance d'un pas, buste légèrement penché, un pied devant l'autre.",
+  "Coudes légèrement fléchis, ramène les mains devant toi vers le bas en arc de cercle.",
+  "Serre les pectoraux une seconde, puis reviens lentement en contrôlant l'étirement."
+],
+"Low Cable Crossover": [
+  "Place les poulies en position basse et saisis une poignée dans chaque main.",
+  "Debout au centre, bras le long du corps, coudes légèrement fléchis.",
+  "Remonte les mains devant toi jusqu'à hauteur du menton en arc de cercle.",
+  "Redescends lentement. Cet exercice cible surtout le haut des pectoraux."
+],
+"Butterfly": [
+  "Règle le siège pour que les poignées soient à hauteur de poitrine.",
+  "Dos bien plaqué au dossier, saisis les poignées (ou appuie les avant-bras sur les coussins).",
+  "Ramène les bras devant toi en serrant les pectoraux.",
+  "Reviens lentement sans laisser les charges se toucher."
+],
+"Machine Bench Press": [
+  "Règle le siège pour que les poignées soient au niveau du milieu de la poitrine.",
+  "Dos plaqué, saisis les poignées et pousse jusqu'à bras presque tendus.",
+  "Reviens lentement jusqu'à sentir l'étirement des pectoraux, sans poser la charge."
+],
+"Leverage Chest Press": [
+  "Règle le siège : poignées à hauteur du milieu de la poitrine.",
+  "Saisis les poignées, omoplates serrées contre le dossier.",
+  "Pousse en expirant jusqu'à bras presque tendus.",
+  "Reviens lentement en contrôlant la charge."
+],
+"Leverage Incline Chest Press": [
+  "Règle le siège pour que les poignées soient au niveau du haut de la poitrine.",
+  "Pousse les poignées vers le haut et l'avant jusqu'à bras presque tendus.",
+  "Redescends lentement en gardant le dos plaqué."
+],
+"Smith Machine Bench Press": [
+  "Place le banc plat sous la barre guidée, la barre au-dessus du milieu de la poitrine.",
+  "Saisis la barre un peu plus large que les épaules et déverrouille-la en tournant les poignets.",
+  "Descends lentement jusqu'à frôler la poitrine.",
+  "Pousse jusqu'à bras tendus et reverrouille la barre à la fin de la série."
+],
+"Smith Machine Incline Bench Press": [
+  "Place un banc incliné à 30–45° sous la barre guidée.",
+  "Déverrouille la barre, prise un peu plus large que les épaules.",
+  "Descends vers le haut de la poitrine puis pousse jusqu'à bras tendus."
+],
+"Dips - Chest Version": [
+  "Monte aux barres parallèles, bras tendus.",
+  "Penche le buste vers l'avant d'environ 30° et écarte légèrement les coudes.",
+  "Descends jusqu'à sentir l'étirement des pectoraux.",
+  "Remonte en poussant jusqu'à bras tendus."
+],
+"Pushups": [
+  "Mets-toi en appui sur les mains (un peu plus large que les épaules) et la pointe des pieds.",
+  "Garde le corps gainé et bien aligné de la tête aux talons.",
+  "Descends jusqu'à ce que la poitrine frôle le sol.",
+  "Pousse pour revenir en position haute."
+],
+"Push-Ups With Feet Elevated": [
+  "Pose les pieds sur un banc et les mains au sol, un peu plus large que les épaules.",
+  "Corps gainé et aligné, descends jusqu'à ce que la poitrine frôle le sol.",
+  "Pousse pour remonter. Cette version insiste sur le haut des pectoraux."
+],
+"Close-Grip Barbell Bench Press": [
+  "Allonge-toi sur le banc et saisis la barre à largeur d'épaules.",
+  "Décroche la barre et descends-la vers le bas de la poitrine en gardant les coudes près du corps.",
+  "Pousse jusqu'à bras tendus en contractant les triceps."
+],
+"Straight-Arm Dumbbell Pullover": [
+  "Allonge-toi en travers ou dans la longueur d'un banc, un haltère tenu à deux mains au-dessus de la poitrine.",
+  "Bras presque tendus, descends l'haltère en arc de cercle derrière la tête.",
+  "Arrête quand tu sens l'étirement des pectoraux et des dorsaux.",
+  "Ramène l'haltère au-dessus de la poitrine."
+],
+"Pullups": [
+  "Saisis la barre en pronation (paumes vers l'avant), un peu plus large que les épaules.",
+  "Pars bras tendus, épaules engagées vers le bas.",
+  "Tire-toi vers le haut jusqu'à ce que le menton passe la barre, en pensant à ramener les coudes vers les hanches.",
+  "Redescends lentement jusqu'à bras tendus."
+],
+"Chin-Up": [
+  "Saisis la barre en supination (paumes vers toi), mains à largeur d'épaules.",
+  "Pars bras tendus.",
+  "Tire jusqu'à ce que le menton dépasse la barre, coudes vers le bas.",
+  "Redescends lentement. Cette version sollicite davantage les biceps."
+],
+"Band Assisted Pull-Up": [
+  "Accroche un élastique à la barre et place un genou ou un pied dedans.",
+  "Saisis la barre en pronation, un peu plus large que les épaules.",
+  "Tire jusqu'à passer le menton au-dessus de la barre puis redescends lentement.",
+  "Plus l'élastique est épais, plus l'aide est grande. Réduis-la au fil des semaines."
+],
+"Wide-Grip Lat Pulldown": [
+  "Règle les boudins pour bloquer tes cuisses et saisis la barre large en pronation.",
+  "Buste légèrement incliné vers l'arrière, poitrine sortie.",
+  "Tire la barre vers le haut de la poitrine en ramenant les coudes vers le bas et l'arrière.",
+  "Remonte lentement jusqu'à bras tendus."
+],
+"Close-Grip Front Lat Pulldown": [
+  "Assieds-toi au poste de tirage, cuisses bloquées.",
+  "Saisis la barre en pronation, mains écartées d'environ 15–20 cm.",
+  "Tire la barre vers le haut de la poitrine en serrant les omoplates.",
+  "Remonte lentement en gardant le contrôle."
+],
+"V-Bar Pulldown": [
+  "Fixe la poignée en V au poste de tirage et assieds-toi, cuisses bloquées.",
+  "Paumes face à face, tire la poignée vers le haut de la poitrine.",
+  "Serre les dorsaux en bas, puis remonte lentement."
+],
+"Underhand Cable Pulldowns": [
+  "Saisis la barre du tirage en supination (paumes vers toi), mains à largeur d'épaules.",
+  "Buste légèrement incliné, tire la barre vers le haut de la poitrine.",
+  "Remonte lentement jusqu'à bras tendus."
+],
+"Seated Cable Rows": [
+  "Assieds-toi au poste de tirage horizontal, pieds sur les cales, genoux légèrement fléchis.",
+  "Saisis la poignée, dos droit, bras tendus.",
+  "Tire la poignée vers le nombril en serrant les omoplates, sans basculer le buste en arrière.",
+  "Reviens lentement en laissant les épaules s'avancer légèrement."
+],
+"Bent Over Barbell Row": [
+  "Debout, barre en main en pronation, genoux légèrement fléchis.",
+  "Penche le buste vers l'avant (environ 45°) en gardant le dos bien droit.",
+  "Tire la barre vers le bas du ventre en serrant les omoplates.",
+  "Redescends lentement jusqu'à bras tendus."
+],
+"One-Arm Dumbbell Row": [
+  "Pose un genou et une main sur un banc plat, dos droit et parallèle au sol.",
+  "Saisis l'haltère avec l'autre main, bras tendu.",
+  "Tire l'haltère vers la hanche en gardant le coude près du corps.",
+  "Redescends lentement puis change de côté."
+],
+"T-Bar Row with Handle": [
+  "Place-toi au-dessus de la barre T, pieds à largeur d'épaules, genoux fléchis.",
+  "Penche le buste à environ 45°, dos droit, et saisis la poignée.",
+  "Tire la charge vers la poitrine en serrant les omoplates.",
+  "Redescends lentement."
+],
+"Bent Over Two-Arm Long Bar Row": [
+  "Coince une extrémité de la barre dans un coin ou un landmine et charge l'autre extrémité.",
+  "Place-toi au-dessus de la barre, buste penché, dos droit, et saisis-la juste derrière les disques.",
+  "Tire la barre vers la poitrine en serrant le dos, puis redescends lentement."
+],
+"Leverage Iso Row": [
+  "Règle le siège pour que les poignées arrivent à hauteur de poitrine, poitrine contre le coussin.",
+  "Saisis les poignées et tire-les vers toi en serrant les omoplates.",
+  "Reviens lentement jusqu'à bras tendus."
+],
+"Leverage High Row": [
+  "Assieds-toi, cuisses calées, et saisis les poignées hautes.",
+  "Tire les poignées vers le bas et l'arrière en direction des épaules.",
+  "Remonte lentement en contrôlant."
+],
+"Straight-Arm Pulldown": [
+  "Debout face à la poulie haute, saisis la barre en pronation à largeur d'épaules.",
+  "Bras tendus (coudes légèrement fléchis), buste légèrement penché vers l'avant.",
+  "Descends la barre en arc de cercle jusqu'aux cuisses en contractant les dorsaux.",
+  "Remonte lentement jusqu'à hauteur des yeux."
+],
+"Inverted Row": [
+  "Place une barre (Smith ou rack) à hauteur de taille et allonge-toi dessous.",
+  "Saisis la barre un peu plus large que les épaules, corps gainé et aligné, talons au sol.",
+  "Tire la poitrine vers la barre en serrant les omoplates.",
+  "Redescends lentement jusqu'à bras tendus."
+],
+"Barbell Deadlift": [
+  "Pieds à largeur de hanches, barre au-dessus du milieu des pieds.",
+  "Fléchis hanches et genoux pour saisir la barre juste à l'extérieur des jambes, dos bien droit, regard devant.",
+  "Pousse dans le sol avec les jambes en gardant la barre collée aux tibias puis aux cuisses.",
+  "Termine debout, hanches tendues, épaules en arrière, sans te cambrer.",
+  "Redescends en reculant d'abord les hanches, dos toujours droit."
+],
+"Hyperextensions (Back Extensions)": [
+  "Règle le banc à lombaires pour que le coussin soit juste sous les hanches.",
+  "Cale tes chevilles, croise les bras sur la poitrine, corps aligné.",
+  "Descends le buste lentement en gardant le dos droit.",
+  "Remonte jusqu'à l'alignement du corps, sans te cambrer au-delà."
+],
+"Barbell Shrug": [
+  "Debout, barre tenue devant les cuisses, bras tendus, prise à largeur d'épaules.",
+  "Monte les épaules le plus haut possible vers les oreilles.",
+  "Tiens une seconde puis redescends lentement. Ne fais pas de rotation des épaules."
+],
+"Dumbbell Shrug": [
+  "Debout, un haltère dans chaque main, bras le long du corps.",
+  "Hausse les épaules vers les oreilles en gardant les bras tendus.",
+  "Marque un temps d'arrêt en haut puis redescends lentement."
+],
+"Face Pull": [
+  "Règle la poulie à hauteur du visage avec la corde.",
+  "Saisis la corde, paumes face à face, et recule d'un pas.",
+  "Tire la corde vers ton visage en écartant les mains et en ouvrant les coudes vers l'extérieur.",
+  "Serre l'arrière des épaules puis reviens lentement."
+],
+"Reverse Machine Flyes": [
+  "Assieds-toi face au dossier de la machine pec deck, poignées réglées vers l'arrière.",
+  "Saisis les poignées bras tendus devant toi.",
+  "Ouvre les bras vers l'arrière en serrant l'arrière des épaules.",
+  "Reviens lentement."
+],
+"Rack Pulls": [
+  "Place la barre sur les sécurités du rack, juste sous ou au-dessus des genoux.",
+  "Saisis la barre, dos droit, comme pour un soulevé de terre.",
+  "Tends les hanches pour te redresser complètement.",
+  "Repose la barre de façon contrôlée."
+],
+"Smith Machine Bent Over Row": [
+  "Barre guidée à hauteur des genoux, saisis-la en pronation.",
+  "Buste penché à environ 45°, dos droit, genoux légèrement fléchis.",
+  "Tire la barre vers le bas du ventre puis redescends lentement."
+],
+"Standing Military Press": [
+  "Debout, barre posée sur le haut de la poitrine, prise un peu plus large que les épaules.",
+  "Serre les fessiers et les abdos pour ne pas te cambrer.",
+  "Pousse la barre à la verticale au-dessus de la tête en passant le visage vers l'arrière.",
+  "Redescends lentement jusqu'au haut de la poitrine."
+],
+"Seated Barbell Military Press": [
+  "Assieds-toi sur un banc avec dossier droit, barre au niveau du haut de la poitrine.",
+  "Pousse la barre au-dessus de la tête jusqu'à bras tendus.",
+  "Redescends lentement jusqu'au menton."
+],
+"Dumbbell Shoulder Press": [
+  "Assieds-toi ou reste debout, un haltère dans chaque main à hauteur d'épaules, paumes vers l'avant.",
+  "Pousse les haltères au-dessus de la tête jusqu'à bras presque tendus.",
+  "Redescends lentement jusqu'à hauteur des oreilles."
+],
+"Seated Dumbbell Press": [
+  "Assieds-toi sur un banc à dossier vertical, haltères à hauteur d'épaules.",
+  "Pousse au-dessus de la tête en expirant.",
+  "Redescends lentement en gardant le dos plaqué au dossier."
+],
+"Arnold Dumbbell Press": [
+  "Assis, haltères devant les épaules, paumes vers toi (comme en fin de curl).",
+  "En poussant vers le haut, tourne les poignets pour finir paumes vers l'avant, bras tendus.",
+  "Redescends en faisant la rotation inverse."
+],
+"Machine Shoulder (Military) Press": [
+  "Règle le siège pour que les poignées soient à hauteur d'épaules.",
+  "Dos plaqué, pousse les poignées vers le haut jusqu'à bras presque tendus.",
+  "Redescends lentement sans poser la charge."
+],
+"Leverage Shoulder Press": [
+  "Règle le siège : poignées à hauteur d'épaules.",
+  "Pousse vers le haut en expirant.",
+  "Reviens lentement en contrôlant la charge."
+],
+"Smith Machine Overhead Shoulder Press": [
+  "Place un banc à dossier vertical sous la barre guidée.",
+  "Déverrouille la barre à hauteur du menton, prise un peu plus large que les épaules.",
+  "Pousse jusqu'à bras tendus puis redescends lentement."
+],
+"Side Lateral Raise": [
+  "Debout, un haltère dans chaque main le long du corps, buste légèrement penché.",
+  "Coudes légèrement fléchis, monte les bras sur les côtés jusqu'à hauteur des épaules.",
+  "Pense à monter avec les coudes, pas avec les mains.",
+  "Redescends lentement sans laisser tomber les haltères."
+],
+"Cable Seated Lateral Raise": [
+  "Assieds-toi de côté à côté d'une poulie basse, poignée dans la main opposée.",
+  "Monte le bras sur le côté jusqu'à hauteur d'épaule, coude légèrement fléchi.",
+  "Redescends lentement et change de côté."
+],
+"Standing Low-Pulley Deltoid Raise": [
+  "Debout de profil à la poulie basse, saisis la poignée avec la main la plus éloignée.",
+  "Monte le bras sur le côté jusqu'à hauteur d'épaule.",
+  "Redescends lentement. La poulie garde la tension tout le long du mouvement."
+],
+"Front Dumbbell Raise": [
+  "Debout, haltères devant les cuisses, paumes vers toi.",
+  "Monte un bras ou les deux devant toi jusqu'à hauteur des yeux, coudes légèrement fléchis.",
+  "Redescends lentement sans élan."
+],
+"Front Plate Raise": [
+  "Debout, tiens un disque à deux mains devant les cuisses.",
+  "Monte le disque bras tendus jusqu'à hauteur des yeux.",
+  "Redescends lentement."
+],
+"Reverse Flyes": [
+  "Penche le buste presque parallèle au sol, haltères sous la poitrine, paumes face à face.",
+  "Coudes légèrement fléchis, écarte les bras sur les côtés en serrant l'arrière des épaules.",
+  "Redescends lentement."
+],
+"Seated Bent-Over Rear Delt Raise": [
+  "Assis au bout d'un banc, buste penché sur les cuisses, haltères sous les jambes.",
+  "Monte les haltères sur les côtés jusqu'à hauteur d'épaules, coudes légèrement fléchis.",
+  "Redescends lentement."
+],
+"Cable Rear Delt Fly": [
+  "Règle deux poulies à hauteur d'épaules et croise les câbles : main droite sur la poulie gauche et inversement.",
+  "Bras tendus devant toi, ouvre les bras vers l'arrière jusqu'à l'alignement des épaules.",
+  "Reviens lentement."
+],
+"Upright Barbell Row": [
+  "Debout, barre devant les cuisses, prise un peu plus serrée que les épaules.",
+  "Tire la barre le long du corps jusqu'au bas de la poitrine, coudes plus hauts que les mains.",
+  "Redescends lentement. Ne monte pas trop haut si tes épaules sont sensibles."
+],
+"Barbell Shoulder Press": [
+  "Assis ou debout, barre sur le haut de la poitrine.",
+  "Pousse la barre au-dessus de la tête jusqu'à bras tendus.",
+  "Redescends lentement en gardant les abdos serrés."
+]
+}

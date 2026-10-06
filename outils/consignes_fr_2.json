@@ -1,0 +1,435 @@
+{
+"Barbell Curl": [
+  "Debout, barre tenue en supination (paumes vers l'avant), mains à largeur d'épaules.",
+  "Coudes collés au corps, monte la barre vers les épaules en contractant les biceps.",
+  "Redescends lentement jusqu'à bras tendus, sans balancer le buste."
+],
+"EZ-Bar Curl": [
+  "Debout, saisis la barre EZ sur les parties inclinées, paumes vers le haut.",
+  "Coudes fixes le long du corps, fléchis les bras jusqu'en haut.",
+  "Redescends lentement. La barre EZ soulage les poignets."
+],
+"Dumbbell Bicep Curl": [
+  "Debout, un haltère dans chaque main, paumes vers l'avant.",
+  "Coudes près du corps, monte les deux haltères vers les épaules.",
+  "Serre les biceps en haut puis redescends lentement."
+],
+"Dumbbell Alternate Bicep Curl": [
+  "Debout, haltères le long du corps, paumes face aux cuisses.",
+  "Monte un haltère en tournant le poignet pour finir paume vers l'épaule.",
+  "Redescends lentement puis alterne avec l'autre bras."
+],
+"Hammer Curls": [
+  "Debout, haltères le long du corps, paumes face à face (prise marteau).",
+  "Coudes fixes, monte les haltères vers les épaules sans tourner les poignets.",
+  "Redescends lentement. Travaille le brachial et les avant-bras."
+],
+"Incline Dumbbell Curl": [
+  "Allonge-toi sur un banc incliné à 45°, bras pendants, haltères en main.",
+  "Monte les haltères en gardant les coudes immobiles.",
+  "Redescends lentement jusqu'à l'étirement complet des biceps."
+],
+"Concentration Curls": [
+  "Assis au bout d'un banc, coude appuyé contre l'intérieur de la cuisse.",
+  "Monte l'haltère vers l'épaule en contractant le biceps.",
+  "Redescends lentement, puis change de bras."
+],
+"Preacher Curl": [
+  "Assieds-toi au pupitre, arrière des bras bien posé sur le coussin.",
+  "Saisis la barre en supination et monte-la vers les épaules.",
+  "Redescends lentement sans tendre complètement le bras pour protéger le coude."
+],
+"Machine Preacher Curls": [
+  "Règle le siège pour que les aisselles reposent en haut du coussin.",
+  "Saisis les poignées et fléchis les bras.",
+  "Redescends lentement en gardant la tension."
+],
+"Machine Bicep Curl": [
+  "Règle le siège pour aligner tes coudes avec l'axe de la machine.",
+  "Fléchis les bras en contractant les biceps.",
+  "Reviens lentement."
+],
+"Standing Biceps Cable Curl": [
+  "Debout face à la poulie basse, barre en supination.",
+  "Coudes collés au corps, monte la barre vers les épaules.",
+  "Redescends lentement. La poulie garde la tension en bas du mouvement."
+],
+"Cable Hammer Curls - Rope Attachment": [
+  "Fixe la corde à la poulie basse et saisis-la, paumes face à face.",
+  "Coudes fixes, monte la corde vers les épaules.",
+  "Redescends lentement."
+],
+"Spider Curl": [
+  "Allonge-toi ventre contre un banc incliné, bras pendants à la verticale.",
+  "Monte la barre ou les haltères en contractant fort les biceps.",
+  "Redescends lentement sans bouger les coudes."
+],
+"Zottman Curl": [
+  "Monte les haltères paumes vers le haut comme un curl classique.",
+  "En haut, tourne les poignets pour avoir les paumes vers le bas.",
+  "Redescends lentement dans cette position, puis retourne les mains en bas."
+],
+"Triceps Pushdown": [
+  "Face à la poulie haute, saisis la barre en pronation, mains à largeur d'épaules.",
+  "Coudes collés au corps, pousse la barre vers le bas jusqu'à bras tendus.",
+  "Remonte lentement jusqu'à ce que les avant-bras soient à l'horizontale."
+],
+"Triceps Pushdown - Rope Attachment": [
+  "Fixe la corde à la poulie haute et saisis-la, paumes face à face.",
+  "Coudes fixes, pousse vers le bas en écartant les mains en fin de mouvement.",
+  "Remonte lentement."
+],
+"Triceps Pushdown - V-Bar Attachment": [
+  "Fixe la barre en V à la poulie haute.",
+  "Coudes collés au corps, pousse jusqu'à bras tendus.",
+  "Remonte lentement en gardant les coudes immobiles."
+],
+"Triceps Overhead Extension with Rope": [
+  "Dos à la poulie (réglée basse ou haute), saisis la corde derrière la tête.",
+  "Avance d'un pas, buste légèrement penché, coudes pointés vers l'avant.",
+  "Tends les bras vers l'avant et le haut.",
+  "Reviens lentement en sentant l'étirement des triceps."
+],
+"EZ-Bar Skullcrusher": [
+  "Allonge-toi sur un banc plat, barre EZ tenue bras tendus au-dessus de la poitrine.",
+  "Fléchis uniquement les coudes pour descendre la barre vers le front.",
+  "Tends les bras pour revenir, sans écarter les coudes."
+],
+"Lying Triceps Press": [
+  "Allongé sur un banc, barre tenue bras tendus au-dessus du visage, prise serrée.",
+  "Descends la barre vers le front en fléchissant les coudes.",
+  "Remonte en contractant les triceps."
+],
+"Standing Dumbbell Triceps Extension": [
+  "Debout ou assis, tiens un haltère à deux mains au-dessus de la tête.",
+  "Descends l'haltère derrière la tête en fléchissant les coudes.",
+  "Remonte jusqu'à bras tendus en gardant les coudes près de la tête."
+],
+"Tricep Dumbbell Kickback": [
+  "Buste penché, un genou et une main sur un banc, haltère dans l'autre main.",
+  "Bras collé au corps, coude fléchi à 90°.",
+  "Tends le bras vers l'arrière, tiens une seconde puis reviens lentement."
+],
+"Bench Dips": [
+  "Assieds-toi au bord d'un banc, mains posées à côté des hanches.",
+  "Avance les fesses dans le vide, jambes tendues ou fléchies.",
+  "Descends en fléchissant les coudes jusqu'à environ 90°.",
+  "Remonte en poussant sur les mains."
+],
+"Dips - Triceps Version": [
+  "Monte aux barres parallèles, bras tendus, buste bien droit.",
+  "Descends en gardant les coudes près du corps, jusqu'à environ 90°.",
+  "Remonte en poussant jusqu'à bras tendus."
+],
+"Machine Triceps Extension": [
+  "Règle le siège pour aligner les coudes avec l'axe de la machine.",
+  "Tends les bras en contractant les triceps.",
+  "Reviens lentement."
+],
+"Push-Ups - Close Triceps Position": [
+  "En position de pompe, mains rapprochées sous la poitrine.",
+  "Descends en gardant les coudes près du corps.",
+  "Remonte en poussant. Cette version cible surtout les triceps."
+],
+"Palms-Up Barbell Wrist Curl Over A Bench": [
+  "À genoux devant un banc, avant-bras posés dessus, poignets dans le vide, paumes vers le haut.",
+  "Laisse la barre descendre en ouvrant les doigts.",
+  "Enroule les poignets vers le haut le plus possible."
+],
+"Palms-Down Wrist Curl Over A Bench": [
+  "Avant-bras posés sur un banc, poignets dans le vide, paumes vers le bas.",
+  "Monte les dos de mains vers le haut en fléchissant les poignets.",
+  "Redescends lentement."
+],
+"Farmer's Walk": [
+  "Saisis deux haltères ou kettlebells lourds, un dans chaque main.",
+  "Tiens-toi droit, épaules en arrière, abdos serrés.",
+  "Marche à petits pas rapides sur la distance ou la durée voulue."
+],
+"Reverse Barbell Curl": [
+  "Debout, barre tenue en pronation (paumes vers le bas).",
+  "Coudes fixes, monte la barre vers les épaules.",
+  "Redescends lentement. Travaille avant-bras et brachial."
+],
+"Barbell Squat": [
+  "Place la barre sur le haut du dos (trapèzes), pas sur la nuque.",
+  "Pieds à largeur d'épaules, pointes légèrement vers l'extérieur.",
+  "Descends en poussant les hanches en arrière et en fléchissant les genoux, dos droit.",
+  "Descends au moins jusqu'à ce que les cuisses soient parallèles au sol, genoux dans l'axe des pieds.",
+  "Remonte en poussant dans les talons."
+],
+"Front Barbell Squat": [
+  "Place la barre sur l'avant des épaules, coudes hauts.",
+  "Pieds à largeur d'épaules, descends en gardant le buste bien droit.",
+  "Remonte en poussant dans le sol, coudes toujours hauts."
+],
+"Goblet Squat": [
+  "Tiens un haltère ou un kettlebell contre la poitrine, à deux mains.",
+  "Pieds un peu plus larges que les épaules, descends en squat, coudes entre les genoux.",
+  "Garde le buste droit puis remonte en poussant dans les talons."
+],
+"Smith Machine Squat": [
+  "Place la barre guidée sur le haut du dos, pieds légèrement en avant de la barre.",
+  "Déverrouille la barre et descends jusqu'à cuisses parallèles au sol.",
+  "Remonte en poussant dans les talons."
+],
+"Leg Press": [
+  "Assieds-toi dans la presse, dos et fesses bien plaqués.",
+  "Pieds sur la plateforme à largeur d'épaules.",
+  "Déverrouille et descends la plateforme jusqu'à environ 90° aux genoux, sans décoller les fesses.",
+  "Pousse sans verrouiller complètement les genoux en haut."
+],
+"Hack Squat": [
+  "Place-toi dans la machine, dos contre le dossier, épaules sous les coussins.",
+  "Pieds à largeur d'épaules sur la plateforme.",
+  "Descends en contrôlant jusqu'à cuisses parallèles, puis remonte."
+],
+"Leg Extensions": [
+  "Règle le dossier pour aligner tes genoux avec l'axe de la machine, le boudin sur le bas des tibias.",
+  "Tends les jambes en contractant les quadriceps.",
+  "Tiens une seconde en haut puis redescends lentement."
+],
+"Lying Leg Curls": [
+  "Allonge-toi ventre sur la machine, le boudin juste au-dessus des talons.",
+  "Fléchis les jambes pour ramener les talons vers les fesses.",
+  "Redescends lentement sans décoller les hanches."
+],
+"Seated Leg Curl": [
+  "Assieds-toi, le boudin sous les mollets et le coussin de blocage sur les cuisses.",
+  "Fléchis les jambes vers le bas et l'arrière.",
+  "Reviens lentement."
+],
+"Romanian Deadlift": [
+  "Debout, barre en main devant les cuisses, genoux légèrement fléchis.",
+  "Pousse les hanches vers l'arrière en faisant glisser la barre le long des cuisses, dos droit.",
+  "Descends jusqu'à sentir l'étirement des ischios (souvent mi-tibia).",
+  "Remonte en poussant les hanches vers l'avant."
+],
+"Stiff-Legged Dumbbell Deadlift": [
+  "Debout, haltères devant les cuisses, jambes presque tendues.",
+  "Penche le buste en poussant les hanches en arrière, dos droit.",
+  "Descends jusqu'à sentir l'étirement des ischios puis remonte."
+],
+"Dumbbell Lunges": [
+  "Debout, un haltère dans chaque main.",
+  "Fais un grand pas en avant et descends jusqu'à ce que le genou arrière frôle le sol.",
+  "Le genou avant reste au-dessus de la cheville.",
+  "Pousse sur la jambe avant pour revenir, puis alterne."
+],
+"Barbell Walking Lunge": [
+  "Barre sur le haut du dos, fais un grand pas en avant.",
+  "Descends jusqu'à ce que le genou arrière frôle le sol.",
+  "Avance la jambe arrière pour enchaîner sur la fente suivante."
+],
+"Split Squat with Dumbbells": [
+  "Haltères en main, place un pied devant et un pied derrière (ou sur un banc pour le squat bulgare).",
+  "Descends verticalement jusqu'à ce que la cuisse avant soit parallèle au sol.",
+  "Remonte en poussant sur le talon avant. Fais toutes les répétitions puis change de jambe."
+],
+"Dumbbell Step Ups": [
+  "Haltères en main, face à un banc ou une box.",
+  "Pose un pied sur le banc et monte en poussant sur ce talon.",
+  "Redescends lentement, puis alterne."
+],
+"Barbell Hip Thrust": [
+  "Assis au sol, haut du dos contre un banc, barre (avec protection) sur les hanches.",
+  "Pieds à plat, genoux fléchis.",
+  "Pousse les hanches vers le haut jusqu'à l'alignement épaules-genoux, en serrant les fessiers.",
+  "Redescends lentement."
+],
+"Barbell Glute Bridge": [
+  "Allongé sur le dos au sol, barre posée sur les hanches, pieds à plat.",
+  "Monte les hanches en serrant les fessiers.",
+  "Tiens une seconde en haut puis redescends."
+],
+"Glute Kickback": [
+  "À quatre pattes ou sur la machine dédiée.",
+  "Pousse une jambe vers l'arrière et le haut en serrant le fessier.",
+  "Reviens lentement sans cambrer le dos."
+],
+"One-Legged Cable Kickback": [
+  "Fixe la sangle de cheville à la poulie basse.",
+  "Face à la machine, tiens-toi au cadre.",
+  "Pousse la jambe vers l'arrière en serrant le fessier, puis reviens lentement."
+],
+"Thigh Abductor": [
+  "Assieds-toi sur la machine, coussins contre l'extérieur des genoux.",
+  "Écarte les jambes le plus possible.",
+  "Reviens lentement sans laisser les charges se toucher."
+],
+"Thigh Adductor": [
+  "Assieds-toi sur la machine, coussins contre l'intérieur des genoux.",
+  "Serre les jambes l'une contre l'autre.",
+  "Reviens lentement."
+],
+"Standing Calf Raises": [
+  "Place les épaules sous les coussins, pointes de pieds sur la marche, talons dans le vide.",
+  "Monte sur la pointe des pieds le plus haut possible.",
+  "Redescends lentement sous le niveau de la marche pour étirer les mollets."
+],
+"Seated Calf Raise": [
+  "Assis sur la machine, coussin sur le bas des cuisses, pointes de pieds sur la marche.",
+  "Monte les talons le plus haut possible.",
+  "Redescends lentement pour un étirement complet."
+],
+"Calf Press On The Leg Press Machine": [
+  "Assis dans la presse, place seulement les pointes de pieds en bas de la plateforme.",
+  "Jambes tendues, pousse avec les chevilles.",
+  "Reviens lentement en laissant les talons descendre."
+],
+"Sumo Deadlift": [
+  "Pieds très écartés, pointes vers l'extérieur, barre contre les tibias.",
+  "Saisis la barre entre les jambes, dos droit.",
+  "Pousse avec les jambes en ouvrant les genoux pour te redresser.",
+  "Redescends de façon contrôlée."
+],
+"Bodyweight Squat": [
+  "Debout, pieds à largeur d'épaules, bras tendus devant toi.",
+  "Descends en poussant les fesses en arrière, dos droit.",
+  "Remonte en poussant dans les talons."
+],
+"Crunches": [
+  "Allongé sur le dos, genoux fléchis, pieds au sol, mains près des tempes.",
+  "Enroule le haut du dos pour décoller les épaules du sol.",
+  "Expire en montant, puis redescends lentement."
+],
+"Plank": [
+  "En appui sur les avant-bras et la pointe des pieds.",
+  "Corps bien aligné de la tête aux talons, abdos et fessiers serrés.",
+  "Tiens la position le temps voulu sans laisser tomber les hanches."
+],
+"Side Bridge": [
+  "Allongé sur le côté, appui sur un avant-bras, coude sous l'épaule.",
+  "Monte les hanches pour aligner le corps.",
+  "Tiens la position puis change de côté."
+],
+"Hanging Leg Raise": [
+  "Suspends-toi à une barre de traction, bras tendus.",
+  "Monte les jambes (tendues ou genoux fléchis) devant toi sans te balancer.",
+  "Redescends lentement."
+],
+"Knee/Hip Raise On Parallel Bars": [
+  "Installe-toi dans la chaise romaine, dos contre le dossier, avant-bras sur les appuis.",
+  "Monte les genoux vers la poitrine en enroulant le bassin.",
+  "Redescends lentement sans balancer."
+],
+"Cable Crunch": [
+  "À genoux face à la poulie haute, corde tenue près de la tête.",
+  "Enroule le buste vers le bas en contractant les abdos, coudes vers les cuisses.",
+  "Reviens lentement. Les hanches restent fixes."
+],
+"Ab Crunch Machine": [
+  "Règle la machine et saisis les poignées.",
+  "Enroule le buste vers l'avant en contractant les abdos.",
+  "Reviens lentement."
+],
+"Russian Twist": [
+  "Assis au sol, genoux fléchis, buste incliné vers l'arrière.",
+  "Tiens un poids devant la poitrine et tourne le buste d'un côté puis de l'autre.",
+  "Pour plus de difficulté, décolle les pieds du sol."
+],
+"Reverse Crunch": [
+  "Allongé sur le dos, jambes fléchies en l'air, bras le long du corps.",
+  "Ramène les genoux vers la poitrine en décollant le bassin.",
+  "Redescends lentement."
+],
+"Ab Roller": [
+  "À genoux, mains sur la roue devant toi.",
+  "Fais rouler la roue vers l'avant en gardant les abdos serrés et le dos droit.",
+  "Va aussi loin que possible sans te cambrer, puis reviens en contractant les abdos."
+],
+"Mountain Climbers": [
+  "En position de pompe, bras tendus.",
+  "Ramène un genou vers la poitrine puis alterne rapidement les jambes.",
+  "Garde les hanches basses et les abdos serrés."
+],
+"Dead Bug": [
+  "Allongé sur le dos, bras tendus vers le plafond, genoux à 90°.",
+  "Plaque le bas du dos au sol.",
+  "Tends lentement un bras et la jambe opposée vers le sol, puis reviens et alterne."
+],
+"Air Bike": [
+  "Allongé sur le dos, mains derrière la tête, jambes levées.",
+  "Ramène un genou vers la poitrine en tournant le buste pour amener le coude opposé vers lui.",
+  "Alterne de façon continue comme si tu pédalais."
+],
+"Decline Crunch": [
+  "Cale tes pieds sur le banc décliné, allonge-toi.",
+  "Enroule le buste vers le haut en contractant les abdos.",
+  "Redescends lentement sans reposer complètement le dos."
+],
+"Pallof Press": [
+  "Debout de profil à une poulie réglée à hauteur de poitrine, poignée à deux mains contre la poitrine.",
+  "Pousse la poignée droit devant toi en résistant à la rotation.",
+  "Tiens une seconde, ramène, puis change de côté."
+],
+"Standing Cable Wood Chop": [
+  "De profil à la poulie haute, saisis la poignée à deux mains.",
+  "Tire la poignée en diagonale vers le bas jusqu'à la hanche opposée, en tournant le buste.",
+  "Reviens lentement puis change de côté."
+],
+"Running, Treadmill": [
+  "Monte sur le tapis et démarre à vitesse de marche.",
+  "Augmente progressivement jusqu'à ta vitesse de course.",
+  "Garde une foulée naturelle et regarde devant toi. Ralentis progressivement à la fin."
+],
+"Walking, Treadmill": [
+  "Démarre le tapis à vitesse lente.",
+  "Marche à un rythme soutenu. Augmente l'inclinaison pour plus d'intensité.",
+  "Évite de te tenir aux barres."
+],
+"Bicycling, Stationary": [
+  "Règle la selle : jambe presque tendue quand la pédale est en bas.",
+  "Pédale à une résistance qui te permet de tenir la durée prévue.",
+  "Varie la résistance pour faire du fractionné."
+],
+"Elliptical Trainer": [
+  "Monte sur les pédales et saisis les poignées.",
+  "Lance le mouvement en poussant et tirant avec bras et jambes.",
+  "Règle la résistance selon ton objectif."
+],
+"Rowing, Stationary": [
+  "Assieds-toi, pieds sanglés, saisis la poignée.",
+  "Pousse d'abord avec les jambes, puis incline le buste en arrière, puis tire la poignée vers le bas des côtes.",
+  "Reviens dans l'ordre inverse : bras, buste, puis jambes."
+],
+"Stairmaster": [
+  "Monte sur la machine et choisis une vitesse.",
+  "Monte les marches en posant tout le pied, buste droit.",
+  "Évite de t'appuyer de tout ton poids sur les rampes."
+],
+"Rope Jumping": [
+  "Tiens les poignées, coudes près du corps.",
+  "Fais tourner la corde avec les poignets et saute juste assez pour la laisser passer.",
+  "Reste sur l'avant des pieds."
+],
+"Recumbent Bike": [
+  "Règle le siège pour que la jambe soit presque tendue en bas.",
+  "Pédale dos contre le dossier à la résistance choisie."
+],
+"Battling Ropes": [
+  "Saisis une extrémité de corde dans chaque main, genoux fléchis, buste droit.",
+  "Fais des vagues en alternant ou en simultané avec les bras.",
+  "Garde un rythme rapide sur la durée choisie."
+],
+"Child's Pose": [
+  "À genoux, assieds-toi sur les talons.",
+  "Penche-toi vers l'avant, bras tendus devant toi, front vers le sol.",
+  "Respire profondément et tiens 20 à 30 secondes."
+],
+"Hamstring Stretch": [
+  "Allongé sur le dos, monte une jambe tendue.",
+  "Tire-la doucement vers toi avec les mains ou une serviette.",
+  "Tiens 20 à 30 secondes puis change de jambe."
+],
+"Quad Stretch": [
+  "Debout, attrape ta cheville et ramène le talon vers la fesse.",
+  "Garde les genoux côte à côte et le bassin droit.",
+  "Tiens 20 à 30 secondes puis change de jambe."
+],
+"Cat Stretch": [
+  "À quatre pattes, mains sous les épaules.",
+  "Arrondis le dos vers le plafond en rentrant le menton.",
+  "Puis creuse doucement le dos en relevant la tête. Alterne lentement."
+]
+}
