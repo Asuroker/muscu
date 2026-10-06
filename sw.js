@@ -1,5 +1,5 @@
 // Service worker : l'app fonctionne hors ligne, les photos d'exercices déjà vues restent en cache.
-const VERSION = 'muscu-v4';
+const VERSION = 'muscu-v5';
 const IMAGES = 'muscu-images-v1';
 const COQUILLE = [
   './', './index.html', './css/app.css', './manifest.webmanifest', './data/exercices.json',
