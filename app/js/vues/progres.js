@@ -194,6 +194,11 @@ export function afficherReglages(el) {
     <h2>Temps de repos entre les séries</h2>
     <div class="puces">${[45, 60, 90, 120, 150, 180].map((s) => `<button class="puce ${r === s ? 'active' : ''}" data-repos="${s}">${s < 60 ? s + ' s' : (s / 60).toString().replace('.', ',') + ' min'}</button>`).join('')}</div>
 
+    <label class="ligne carte" style="margin-top:10px;cursor:pointer">
+      <input type="checkbox" id="repos-auto" ${etat.reglages.reposAuto !== false ? 'checked' : ''} style="width:22px;height:22px;accent-color:var(--accent)">
+      <span class="flex1">Lancer le repos automatiquement quand je valide une série</span>
+    </label>
+
     <h2>Sauvegarde</h2>
     <p class="discret">Tes données restent sur ce téléphone. Exporte-les de temps en temps (dans Fichiers ou iCloud) pour ne rien perdre.</p>
     <div class="pile">
@@ -217,6 +222,7 @@ export function afficherReglages(el) {
     <p class="tres-discret" style="margin-top:24px">Exercices et photos : free-exercise-db (domaine public). Salles et horaires : © contributeurs OpenStreetMap.</p>
   `;
   el.querySelectorAll('[data-repos]').forEach((b) => (b.onclick = () => maj((e) => (e.reglages.repos = +b.dataset.repos))));
+  el.querySelector('#repos-auto').onchange = (ev) => maj((e) => (e.reglages.reposAuto = ev.target.checked), { silencieux: true });
   el.querySelector('#exporter').onclick = exporter;
   el.querySelector('#importer').onchange = async (e) => {
     const f = e.target.files[0];

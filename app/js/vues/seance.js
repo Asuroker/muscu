@@ -170,6 +170,7 @@ function afficherEnCours(el) {
   const minutes = (Date.now() - s.debutTs) / 60000;
   const total = s.exercices.reduce((t, e) => t + e.series.length, 0);
   const faites = s.exercices.reduce((t, e) => t + e.series.filter((x) => x.faite).length, 0);
+  const exFinis = s.exercices.filter((e) => e.fini).length;
 
   el.innerHTML = `
     <div class="carte">
@@ -189,6 +190,10 @@ function afficherEnCours(el) {
       </div>
       ${s.dureeVisee ? `<div class="barre-xp"><div id="jauge-temps" style="width:${Math.min(100, (minutes / s.dureeVisee) * 100)}%"></div></div>
         <div class="tres-discret" style="margin-top:4px">Objectif : ${duree(s.dureeVisee)}${salle(s.salleId) ? ' · ' + esc(salle(s.salleId).nom) : ''}</div>` : ''}
+      <div class="ligne" style="margin-top:12px">
+        <button class="btn btn-petit flex1" id="repos">${ICONES.horloge} Repos · ${texteDuree(etat.reglages.repos || 90)}</button>
+        ${s.exercices.length ? `<span class="etiquette ${exFinis === s.exercices.length ? 'vert' : ''}" style="padding:8px 12px">✓ ${exFinis} / ${s.exercices.length} exercices</span>` : ''}
+      </div>
     </div>
 
     <div style="margin-top:12px">${s.exercices.map((e, i) => carteEnCours(e, i, s.exercices.length)).join('')}</div>
@@ -211,8 +216,23 @@ function afficherEnCours(el) {
     const [i, j] = b.dataset.coche.split(':').map(Number);
     let faite;
     maj((e) => { const x = e.enCours.exercices[i].series[j]; x.faite = !x.faite; faite = x.faite; });
-    if (faite) lancerRepos(etat.reglages.repos || 90);
+    if (faite && etat.reglages.reposAuto !== false) lancerRepos(etat.reglages.repos || 90);
   }));
+  el.querySelectorAll('[data-fini]').forEach((b) => (b.onclick = () => {
+    const i = +b.dataset.fini;
+    let fini;
+    maj((e) => {
+      const x = e.enCours.exercices[i];
+      x.fini = !x.fini;
+      fini = x.fini;
+      if (fini) x.series.forEach((y) => { if (y.reps > 0) y.faite = true; });
+    });
+    if (fini) {
+      toast('Exercice terminé ✓');
+      if (etat.reglages.reposAuto !== false) lancerRepos(etat.reglages.repos || 90);
+    }
+  }));
+  el.querySelector('#repos').onclick = choisirRepos;
   el.querySelectorAll('[data-plus-serie]').forEach((b) => (b.onclick = () => maj((e) => {
     const series = e.enCours.exercices[+b.dataset.plusSerie].series;
     const der = series[series.length - 1] || { reps: 10, kg: 0 };
@@ -232,6 +252,7 @@ function afficherEnCours(el) {
     }
   };
   document.getElementById('terminer').onclick = () => terminer();
+  afficherRepos();
 
   const minuteur = setInterval(() => {
     const c = el.querySelector('#chrono');
@@ -257,6 +278,20 @@ function carteEnCours(e, i, n) {
   const avant = dernieresSeries(e.exId, etat.enCours.id);
   const toutesFaites = e.series.length && e.series.every((x) => x.faite);
   const fmt = (v) => (v ? String(v).replace('.', ',') : '');
+  const boutonFini = `<button class="coche rond ${e.fini ? 'ok' : ''}" data-fini="${i}" aria-label="${e.fini ? 'Rouvrir l’exercice' : 'Exercice terminé'}">${ICONES.coche}</button>`;
+  if (e.fini) {
+    const faites = e.series.filter((x) => x.faite);
+    return `<div class="ex-carte termine replie">
+      <div class="ligne">
+        ${image(ex) ? `<img class="vignette petite" src="${image(ex)}" alt="" loading="lazy">` : ''}
+        <div class="flex1">
+          <div style="font-weight:700;line-height:1.25;text-decoration:line-through;text-decoration-color:var(--vert)">${esc(ex?.n || e.exId)}</div>
+          <div class="tres-discret">${faites.length ? faites.map((x) => texteSerie(ex, x)).join(' · ') : 'Aucune série'}</div>
+        </div>
+        ${boutonFini}
+      </div>
+    </div>`;
+  }
   return `<div class="ex-carte ${toutesFaites ? 'termine' : ''}">
     <div class="ligne">
       ${image(ex) ? `<img class="vignette" src="${image(ex)}" alt="" loading="lazy" data-voir="${ex.id}" style="cursor:pointer">` : '<div class="vignette vide"></div>'}
@@ -265,6 +300,7 @@ function carteEnCours(e, i, n) {
         <div class="tres-discret">${avant ? 'Dernière fois : ' + avant.map((x) => texteSerie(ex, x)).join(' · ') : 'Première fois 💥'}</div>
       </div>
       <button class="btn btn-icone" data-menu="${i}" aria-label="Options">⋯</button>
+      ${boutonFini}
     </div>
     <table class="series">
       <thead><tr><th>Série</th>${col.kg ? `<th>${col.kg}</th>` : ''}<th>${col.reps}</th><th></th></tr></thead>
@@ -370,8 +406,17 @@ function deduireTypes(exercices) {
 // Minuteur de repos
 // =====================================================================
 
-let repos = null; // {fin, total, el, timer}
+let repos = null; // {el, timer} — l'état (fin, début…) est gardé dans etat.enCours.repos
 let audio = null;
+
+export const DUREES_REPOS = [30, 45, 60, 90, 120, 150, 180, 240, 300];
+export const texteDuree = (sec) => (sec < 60 ? `${sec} s` : `${Math.floor(sec / 60)} min${sec % 60 ? ' ' + (sec % 60) : ''}`);
+const mmss = (sec) => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+
+function debloquerAudio() {
+  // Sur iPhone, le son doit être activé pendant un geste de l'utilisateur.
+  try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); audio.resume(); } catch { /* rien */ }
+}
 
 function bip() {
   try {
@@ -388,41 +433,116 @@ function bip() {
   } catch { /* pas de son */ }
 }
 
+/** Compte à rebours de repos. */
 function lancerRepos(secondes) {
-  // L'audio doit être débloqué pendant un geste de l'utilisateur (iOS).
-  try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); audio.resume(); } catch { /* rien */ }
-  arreterRepos();
-  const el = document.createElement('div');
-  el.className = 'repos';
-  document.body.append(el);
-  repos = { fin: Date.now() + secondes * 1000, total: secondes, el };
-  const dessiner = () => {
-    const reste = Math.max(0, Math.round((repos.fin - Date.now()) / 1000));
-    el.innerHTML = `<div><div class="tres-discret">Repos</div><div class="temps">${Math.floor(reste / 60)}:${String(reste % 60).padStart(2, '0')}</div></div>
-      <div class="jauge"><div style="width:${(reste / repos.total) * 100}%"></div></div>
-      <button class="btn btn-petit" data-r="-15">−15</button><button class="btn btn-petit" data-r="15">+15</button>
-      <button class="btn btn-petit btn-principal" data-r="stop">OK</button>`;
-    el.querySelectorAll('[data-r]').forEach((b) => (b.onclick = () => {
-      if (b.dataset.r === 'stop') return arreterRepos();
-      repos.fin += +b.dataset.r * 1000;
-      repos.total = Math.max(repos.total, Math.round((repos.fin - Date.now()) / 1000));
-      dessiner();
-    }));
-    if (reste <= 0) {
-      bip();
-      vibrer([200, 100, 200]);
-      toast('Repos terminé, série suivante 💪');
-      arreterRepos();
-    }
-  };
-  dessiner();
-  repos.timer = setInterval(dessiner, 1000);
+  debloquerAudio();
+  maj((e) => { if (e.enCours) e.enCours.repos = { mode: 'decompte', fin: Date.now() + secondes * 1000, total: secondes }; }, { silencieux: true });
+  afficherRepos();
 }
 
-function arreterRepos() {
+/** Chronomètre libre (compte à l'endroit). */
+function lancerChrono() {
+  debloquerAudio();
+  maj((e) => { if (e.enCours) e.enCours.repos = { mode: 'chrono', debut: Date.now() }; }, { silencieux: true });
+  afficherRepos();
+}
+
+/** Affiche la barre de repos d'après l'état sauvegardé (y compris après une fermeture de l'app). */
+function afficherRepos() {
+  const r = etat.enCours?.repos;
+  if (!r) return masquerRepos();
+  if (!repos) {
+    const el = document.createElement('div');
+    el.className = 'repos';
+    document.body.append(el);
+    repos = { el, timer: setInterval(() => dessinerRepos(), 1000) };
+    document.body.classList.add('avec-repos');
+  }
+  dessinerRepos(true);
+}
+
+function dessinerRepos(complet = false) {
+  const r = etat.enCours?.repos;
+  if (!r || !repos) return masquerRepos();
+  const el = repos.el;
+  if (r.mode === 'chrono') {
+    const ecoule = Math.max(0, Math.floor((Date.now() - r.debut) / 1000));
+    if (complet) {
+      el.innerHTML = `<div><div class="tres-discret">Chrono repos</div><div class="temps"></div></div><div class="flex1"></div>
+        <button class="btn btn-petit" data-r="zero">↺ 0</button><button class="btn btn-petit btn-principal" data-r="stop">Stop</button>`;
+      brancherBoutons();
+    }
+    el.querySelector('.temps').textContent = mmss(ecoule);
+    return;
+  }
+  const reste = Math.max(0, Math.round((r.fin - Date.now()) / 1000));
+  if (complet) {
+    el.innerHTML = `<div><div class="tres-discret">Repos</div><div class="temps"></div></div>
+      <div class="jauge"><div></div></div>
+      <button class="btn btn-petit" data-r="-15">−15</button><button class="btn btn-petit" data-r="15">+15</button>
+      <button class="btn btn-petit btn-principal" data-r="stop">OK</button>`;
+    brancherBoutons();
+  }
+  el.querySelector('.temps').textContent = mmss(reste);
+  el.querySelector('.jauge div').style.width = `${Math.min(100, (reste / r.total) * 100)}%`;
+  if (reste <= 0) {
+    bip();
+    vibrer([200, 100, 200]);
+    toast('Repos terminé, série suivante 💪');
+    arreterRepos();
+  }
+}
+
+function brancherBoutons() {
+  repos.el.querySelectorAll('[data-r]').forEach((b) => (b.onclick = () => {
+    const a = b.dataset.r;
+    if (a === 'stop') return arreterRepos();
+    maj((e) => {
+      const r = e.enCours?.repos;
+      if (!r) return;
+      if (a === 'zero') r.debut = Date.now();
+      else {
+        r.fin += +a * 1000;
+        r.total = Math.max(r.total, Math.round((r.fin - Date.now()) / 1000));
+      }
+    }, { silencieux: true });
+    dessinerRepos();
+  }));
+}
+
+function masquerRepos() {
   if (!repos) return;
   clearInterval(repos.timer);
   repos.el.remove();
   repos = null;
+  document.body.classList.remove('avec-repos');
 }
 
+function arreterRepos() {
+  masquerRepos();
+  if (etat.enCours?.repos) maj((e) => { delete e.enCours.repos; }, { silencieux: true });
+}
+
+/** Feuille pour lancer le repos à la main ou le chronomètre. */
+function choisirRepos() {
+  ouvrirFeuille((el, fermer) => {
+    const actuel = etat.reglages.repos || 90;
+    const auto = etat.reglages.reposAuto !== false;
+    el.innerHTML = `<h2>⏱ Temps de repos</h2>
+      <p class="discret">Touche une durée pour lancer le compte à rebours. Elle devient ta durée par défaut.</p>
+      <div class="grille-3">${DUREES_REPOS.map((d) => `<button class="btn ${d === actuel ? 'btn-principal' : ''}" data-d="${d}">${texteDuree(d)}</button>`).join('')}</div>
+      <button class="btn btn-plein" id="chrono-libre" style="margin-top:10px">${ICONES.horloge} Chronomètre libre (compte à l’endroit)</button>
+      <label class="ligne carte" style="margin-top:14px;cursor:pointer">
+        <input type="checkbox" id="auto" ${auto ? 'checked' : ''} style="width:22px;height:22px;accent-color:var(--accent)">
+        <span class="flex1">Lancer le repos automatiquement quand je valide une série</span>
+      </label>`;
+    el.querySelectorAll('[data-d]').forEach((b) => (b.onclick = () => {
+      const d = +b.dataset.d;
+      maj((e) => (e.reglages.repos = d), { silencieux: true });
+      fermer();
+      lancerRepos(d);
+    }));
+    el.querySelector('#chrono-libre').onclick = () => { fermer(); lancerChrono(); };
+    el.querySelector('#auto').onchange = (ev) => maj((e) => (e.reglages.reposAuto = ev.target.checked), { silencieux: true });
+  });
+}
