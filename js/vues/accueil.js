@@ -8,7 +8,7 @@ import { totalCalories } from '../calories.js';
 import { ajouterPoids, exporter, joursDepuisSauvegarde } from './progres.js';
 import { ajouterSeanceManuelle } from './calendrier.js';
 import { carteObjectifPoids } from './objectifs.js';
-import { besoins, OBJECTIFS_NUTRI, RECETTES, TYPES_REPAS } from '../nutrition.js';
+import { besoins, OBJECTIFS_NUTRI, RECETTES, TYPES_REPAS, imageRecette } from '../nutrition.js';
 
 export function carteNiveau() {
   const n = niveauActuel();
@@ -80,6 +80,7 @@ export function afficher(el) {
       </div>
     </div>
     <div class="carte cliquable" data-aller="recettes" style="margin-top:10px">
+      ${imageRecette(recetteDuJour()) ? `<img src="${imageRecette(recetteDuJour())}" alt="" style="width:100%;aspect-ratio:16/7;object-fit:cover;border-radius:12px;margin-bottom:10px;display:block">` : ''}
       <div class="ligne">
         <div class="vignette vide" style="font-size:28px">🍽️</div>
         <div class="flex1">
