@@ -13,7 +13,7 @@ function etatInitial() {
     xp: [],              // {date, montant, raison}
     bons: [],            // {id, titre, emoji, niveau, gagneLe, utiliseLe}
     regles: [            // récompenses par niveau : la plus grande "tous" qui divise le niveau gagne
-      { tous: 10, emoji: '🛍️', titre: 'Nouvel équipement de sport' },
+      { tous: 10, emoji: '🎮', titre: 'Soirée jeux vidéo illimitée' },
       { tous: 5, emoji: '🍔', titre: 'Cheat meal' },
       { tous: 3, emoji: '🍫', titre: 'Snack sucré au choix' },
       { tous: 1, emoji: '🥤', titre: 'Boisson sucrée' },
@@ -27,10 +27,22 @@ function charger() {
   try {
     const brut = localStorage.getItem(CLE);
     if (!brut) return etatInitial();
-    return { ...etatInitial(), ...JSON.parse(brut) };
+    return migrer({ ...etatInitial(), ...JSON.parse(brut) });
   } catch {
     return etatInitial();
   }
+}
+
+/** Met à jour les données enregistrées avec une ancienne version de l'app. */
+function migrer(e) {
+  // Récompense par défaut remplacée : équipement de sport → soirée jeux vidéo.
+  for (const r of e.regles || []) {
+    if (r.titre === 'Nouvel équipement de sport' && r.emoji === '🛍️') {
+      r.titre = 'Soirée jeux vidéo illimitée';
+      r.emoji = '🎮';
+    }
+  }
+  return e;
 }
 
 export const etat = charger();
@@ -58,7 +70,7 @@ export function abonner(f) {
 
 export function remplacerEtat(nouveau) {
   Object.keys(etat).forEach((k) => delete etat[k]);
-  Object.assign(etat, etatInitial(), nouveau);
+  Object.assign(etat, migrer({ ...etatInitial(), ...nouveau }));
   sauver();
   abonnes.forEach((f) => f());
 }
