@@ -19,7 +19,7 @@ export function afficher(el) {
 
     <h2>Mes bons ${dispo.length ? `<span class="etiquette or">${dispo.length}</span>` : ''}</h2>
     ${dispo.length ? `<div class="pile">${dispo.map((b) => `<div class="bon">
-        <div class="emoji">${b.emoji}</div>
+        <div class="emoji">${esc(b.emoji)}</div>
         <div class="flex1"><div style="font-weight:750">${esc(b.titre)}</div><div class="tres-discret">Gagné au niveau ${b.niveau} · ${fmtDate(b.gagneLe)}</div></div>
         <button class="btn btn-petit btn-or" data-utiliser="${b.id}">Utiliser</button>
       </div>`).join('')}</div>`
@@ -27,7 +27,7 @@ export function afficher(el) {
 
     <h2>Prochaines récompenses</h2>
     <div class="liste">${prochains.map(({ niv, r }) => `<div class="item" style="cursor:default">
-      <div class="vignette vide" style="font-size:24px">${r.emoji}</div>
+      <div class="vignette vide" style="font-size:24px">${esc(r.emoji)}</div>
       <div class="flex1"><div class="titre">${esc(r.titre)}</div><div class="sous">Niveau ${niv} · ${esc(titreNiveau(niv))}</div></div>
     </div>`).join('')}</div>
 
@@ -45,14 +45,14 @@ export function afficher(el) {
     <h2>Règles des récompenses</h2>
     <p class="discret">À chaque niveau gagné, tu reçois un bon. La règle avec le plus grand « tous les » qui tombe juste l’emporte.</p>
     <div class="liste">${[...etat.regles].sort((a, b) => b.tous - a.tous).map((r) => `<div class="item" data-regle="${etat.regles.indexOf(r)}">
-      <div class="vignette vide" style="font-size:24px">${r.emoji}</div>
+      <div class="vignette vide" style="font-size:24px">${esc(r.emoji)}</div>
       <div class="flex1"><div class="titre">${esc(r.titre)}</div><div class="sous">${r.tous === 1 ? 'À chaque niveau' : `Tous les ${r.tous} niveaux`}</div></div>
       ${ICONES.crayon}
     </div>`).join('')}</div>
     <button class="btn btn-plein" id="nouvelle" style="margin-top:10px">${ICONES.plus} Nouvelle récompense</button>
 
     ${utilises.length ? `<h2>Bons utilisés</h2><div class="pile">${utilises.slice(0, 30).map((b) => `<div class="bon utilise">
-      <div class="emoji">${b.emoji}</div>
+      <div class="emoji">${esc(b.emoji)}</div>
       <div class="flex1"><div style="font-weight:700">${esc(b.titre)}</div><div class="tres-discret">Utilisé le ${fmtDate(b.utiliseLe)}</div></div>
     </div>`).join('')}</div>` : ''}
   `;
@@ -112,7 +112,7 @@ export function celebrer({ lignes = [], total = 0, niveaux = [], bons = [], kcal
           <tr><td><strong>Total</strong></td><td><strong style="color:var(--or)">+${total} XP</strong></td></tr></table>
       </div>
       ${bons.length ? `<h2>Nouveau${bons.length > 1 ? 'x' : ''} bon${bons.length > 1 ? 's' : ''} débloqué${bons.length > 1 ? 's' : ''} 🎁</h2>
-        <div class="pile">${bons.map((b) => `<div class="bon"><div class="emoji">${b.emoji}</div><div class="flex1"><div style="font-weight:750">${esc(b.titre)}</div><div class="tres-discret">À utiliser quand tu veux</div></div></div>`).join('')}</div>` : ''}
+        <div class="pile">${bons.map((b) => `<div class="bon"><div class="emoji">${esc(b.emoji)}</div><div class="flex1"><div style="font-weight:750">${esc(b.titre)}</div><div class="tres-discret">À utiliser quand tu veux</div></div></div>`).join('')}</div>` : ''}
       <button class="btn btn-principal btn-plein" id="c-ok" style="margin-top:16px">Super !</button>`;
     el.querySelector('#c-ok').onclick = fermer;
   });

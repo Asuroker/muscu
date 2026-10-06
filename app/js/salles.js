@@ -1,5 +1,7 @@
 // Recherche de salles de sport (OpenStreetMap) et horaires d'ouverture.
 
+import { urlSure } from './validation.js';
+
 const OVERPASS = [
   'https://overpass-api.de/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
@@ -90,7 +92,7 @@ function versSalle(el, centre) {
   const horairesOsm = t.opening_hours || '';
   return {
     osm: `${el.type}/${el.id}`, nom, marque, ville, adresse, lat, lon,
-    site: t.website || t['contact:website'] || '',
+    site: urlSure(t.website || t['contact:website'] || ''),
     tel: t.phone || t['contact:phone'] || '',
     horairesOsm,
     horaires: lireHorairesOsm(horairesOsm),

@@ -76,7 +76,7 @@ function ligneSeance(s) {
   return `<div class="item" data-seance="${s.id}">
     <div class="vignette vide" style="font-weight:800;font-size:13px;color:var(--accent)">${esc(s.debut)}</div>
     <div class="flex1">
-      <div class="titre">${(s.types || []).map(nomGroupe).join(' · ') || 'Séance'}</div>
+      <div class="titre">${esc((s.types || []).map(nomGroupe).join(' · ') || 'Séance')}</div>
       <div class="sous">${duree(s.duree)} · 🔥 ${fmtKcal(caloriesSeance(s).total)}${sa ? ' · ' + esc(sa.nom) : ''}${nbEx ? ` · ${nbEx} exercice${nbEx > 1 ? 's' : ''}` : ''}</div>
     </div>
     ${ICONES.chevron}

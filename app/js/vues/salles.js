@@ -5,6 +5,7 @@ import {
   lienPlans, lienRechercheHoraires, lireHorairesOsm,
 } from '../salles.js';
 import { ICONES, ouvrirFeuille, confirmer, toast } from '../ui.js';
+import { urlSure } from '../validation.js';
 
 const recherche = { lieu: '', nom: '', resultats: null, message: '', enCours: false };
 
@@ -119,7 +120,7 @@ export function afficherSalle(el, [id]) {
     <h2>Infos</h2>
     <div class="liste">
       ${s.lat ? `<a class="item" href="${lienPlans(s)}" target="_blank" rel="noopener">${ICONES.lieu}<div class="flex1">Itinéraire dans Plans</div>${ICONES.chevron}</a>` : ''}
-      ${s.site ? `<a class="item" href="${esc(s.site)}" target="_blank" rel="noopener">${ICONES.externe}<div class="flex1">Site web</div>${ICONES.chevron}</a>` : ''}
+      ${urlSure(s.site) ? `<a class="item" href="${esc(urlSure(s.site))}" target="_blank" rel="noopener">${ICONES.externe}<div class="flex1">Site web</div>${ICONES.chevron}</a>` : ''}
       ${s.tel ? `<a class="item" href="tel:${esc(s.tel.replace(/\s/g, ''))}">📞<div class="flex1">${esc(s.tel)}</div>${ICONES.chevron}</a>` : ''}
       <div class="item" style="cursor:default">🏋️<div class="flex1">${visites.length} séance${visites.length > 1 ? 's' : ''} dans cette salle</div></div>
     </div>
@@ -196,7 +197,10 @@ function editerInfos(s) {
       const nom = el.querySelector('#i-nom').value.trim();
       if (!nom) return toast('Donne un nom à la salle');
       const osmTxt = el.querySelector('#i-osm').value.trim();
-      const champs = { nom, adresse: el.querySelector('#i-adr').value.trim(), site: el.querySelector('#i-site').value.trim() };
+      let site = el.querySelector('#i-site').value.trim();
+      if (site && !/^https?:\/\//i.test(site)) site = 'https://' + site;
+      if (site && !urlSure(site)) return toast('Adresse du site invalide');
+      const champs = { nom, adresse: el.querySelector('#i-adr').value.trim(), site: urlSure(site) };
       if (osmTxt !== (s?.horairesOsm || '')) {
         const lu = lireHorairesOsm(osmTxt);
         if (osmTxt && !lu) return toast('Format d’horaires non reconnu');

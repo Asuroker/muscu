@@ -6,6 +6,7 @@ import {
 } from '../nutrition.js';
 import { caloriesSeance, fmtKcal } from '../calories.js';
 import { ICONES, ouvrirFeuille, toast } from '../ui.js';
+import { urlSure } from '../validation.js';
 
 let graine = 0; // pour "Autre proposition"
 const filtresRecettes = { type: '', tag: '' };
@@ -206,7 +207,7 @@ export function afficherRecette(el, [id]) {
 
     <a class="btn btn-plein" style="margin-top:14px" href="https://www.youtube.com/results?search_query=${encodeURIComponent('recette ' + r.nom.replace(/\(.*?\)/g, ''))}" target="_blank" rel="noopener">▶️ Voir des vidéos de cette recette</a>
     <p class="tres-discret" style="margin-top:12px">Valeurs nutritionnelles approximatives, calculées à partir des ingrédients.</p>
-    ${creditRecette(r) ? `<p class="tres-discret">Photo d’illustration (le plat peut légèrement différer) : ${esc(creditRecette(r).auteur)}, <a href="${esc(creditRecette(r).licenceUrl || creditRecette(r).page)}" target="_blank" rel="noopener" style="color:inherit">${esc(creditRecette(r).licence)}</a>, via <a href="${esc(creditRecette(r).page)}" target="_blank" rel="noopener" style="color:inherit">Wikimedia Commons</a>.</p>` : ''}
+    ${creditRecette(r) ? `<p class="tres-discret">Photo d’illustration (le plat peut légèrement différer) : ${esc(creditRecette(r).auteur)}, <a href="${esc(urlSure(creditRecette(r).licenceUrl) || urlSure(creditRecette(r).page))}" target="_blank" rel="noopener" style="color:inherit">${esc(creditRecette(r).licence)}</a>, via <a href="${esc(urlSure(creditRecette(r).page))}" target="_blank" rel="noopener" style="color:inherit">Wikimedia Commons</a>.</p>` : ''}
   `;
   const changer = (d) => { facteurs[id] = Math.max(0.5, Math.min(4, f + d)); afficherRecette(el, [id]); };
   el.querySelector('#moins').onclick = () => changer(-0.25);
