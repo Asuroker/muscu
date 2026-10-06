@@ -5,6 +5,7 @@ import { etat, jour } from './store.js';
 import { poidsA } from './calories.js';
 import { RECETTES_PLUS } from './recettes.js';
 import { RECETTES_PLUS_2 } from './recettes-2.js';
+import { RECETTES_PLUS_3 } from './recettes-3.js';
 
 export const INGREDIENTS = {
   avoine: ['Flocons d’avoine', 372, 13.5, 58.7, 7],
@@ -98,6 +99,17 @@ export const INGREDIENTS = {
   poireau: ['Poireau', 30, 1.5, 5, 0.3],
   chouFleur: ['Chou-fleur', 25, 2, 3, 0.3],
   compote: ['Compote sans sucres ajoutés', 50, 0.3, 11, 0.1],
+  rizComplet: ['Riz complet (cru)', 350, 7.5, 74, 2.7],
+  polenta: ['Polenta (sèche)', 360, 8, 77, 1.5],
+  haricotsBlancs: ['Haricots blancs (conserve, égouttés)', 100, 7, 14, 0.5],
+  tempeh: ['Tempeh', 190, 19, 9, 11],
+  laitAmande: ['Lait d’amande sans sucre', 15, 0.5, 0.3, 1.1],
+  cajou: ['Noix de cajou', 580, 18, 27, 46],
+  orange: ['Orange', 47, 0.9, 10, 0.1],
+  kiwi: ['Kiwi', 60, 1.1, 12, 0.5],
+  fraises: ['Fraises', 32, 0.7, 6, 0.3],
+  betterave: ['Betterave cuite', 43, 1.6, 8, 0.2],
+  asperges: ['Asperges vertes', 20, 2.2, 2, 0.1],
 };
 
 // type : petitdej | repas | collation · tags : seche, masse, equilibre, vege, rapide, pre, post
@@ -343,7 +355,7 @@ const RECETTES_BASE = [
   },
 ];
 
-export const RECETTES = [...RECETTES_BASE, ...RECETTES_PLUS, ...RECETTES_PLUS_2];
+export const RECETTES = [...RECETTES_BASE, ...RECETTES_PLUS, ...RECETTES_PLUS_2, ...RECETTES_PLUS_3];
 
 export const TYPES_REPAS = { petitdej: 'Petit-déjeuner', repas: 'Déjeuner / dîner', collation: 'Collation' };
 export const TAGS = {
