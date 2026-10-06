@@ -2,7 +2,7 @@ import { etat, maj, esc, jour, kg } from '../store.js';
 import { entete, aller } from '../nav.js';
 import {
   RECETTES, INGREDIENTS, TYPES_REPAS, TAGS, ACTIVITES, OBJECTIFS_NUTRI, CONSEILS,
-  recette, macrosRecette, besoins, profilComplet, objectifNutri, journeeType,
+  recette, macrosRecette, besoins, profilComplet, objectifNutri, journeeType, vignetteRecette, imageRecette, creditRecette,
 } from '../nutrition.js';
 import { caloriesSeance, fmtKcal } from '../calories.js';
 import { ICONES, ouvrirFeuille, toast } from '../ui.js';
@@ -57,7 +57,7 @@ export function afficher(el) {
     <div class="liste">${journee.map(({ moment, r }) => {
       const m = macrosRecette(r);
       return `<a class="item" href="#/recette/${r.id}">
-        <div class="vignette vide" style="font-size:28px">${r.emoji}</div>
+        ${vignetteRecette(r)}
         <div class="flex1"><div class="tres-discret">${moment}</div><div class="titre">${esc(r.nom)}</div>
         <div class="sous">${Math.round(m.kcal)} kcal · ${Math.round(m.p)} g protéines</div></div>${ICONES.chevron}</a>`;
     }).join('')}</div>
@@ -151,7 +151,7 @@ export function afficherRecettes(el) {
     ${liste.length ? `<div class="liste">${liste.map((r) => {
       const m = macrosRecette(r);
       return `<a class="item" href="#/recette/${r.id}">
-        <div class="vignette vide" style="font-size:28px">${r.emoji}</div>
+        ${vignetteRecette(r)}
         <div class="flex1"><div class="titre">${esc(r.nom)}</div>
           <div class="sous">${Math.round(m.kcal)} kcal · ${Math.round(m.p)} g prot. · ${r.minutes} min</div></div>${ICONES.chevron}</a>`;
     }).join('')}</div>` : '<p class="discret">Aucune recette avec ces filtres.</p>'}
@@ -173,8 +173,9 @@ export function afficherRecette(el, [id]) {
   };
 
   el.innerHTML = `
-    <div class="centre" style="font-size:64px;line-height:1.1;margin-top:4px">${r.emoji}</div>
-    <div class="centre" style="font-size:21px;font-weight:800;margin-top:6px">${esc(r.nom)}</div>
+    ${imageRecette(r) ? `<div class="photo-recette"><img src="${imageRecette(r)}" alt="${esc(r.nom)}"><span>${r.emoji}</span></div>`
+      : `<div class="centre" style="font-size:64px;line-height:1.1;margin-top:4px">${r.emoji}</div>`}
+    <div class="centre" style="font-size:21px;font-weight:800;margin-top:10px">${esc(r.nom)}</div>
     <div class="puces" style="justify-content:center;margin-top:10px">
       <span class="etiquette accent">${TYPES_REPAS[r.type]}</span>
       <span class="etiquette">⏱ ${r.minutes} min</span>
@@ -205,6 +206,7 @@ export function afficherRecette(el, [id]) {
 
     <a class="btn btn-plein" style="margin-top:14px" href="https://www.youtube.com/results?search_query=${encodeURIComponent('recette ' + r.nom.replace(/\(.*?\)/g, ''))}" target="_blank" rel="noopener">▶️ Voir des vidéos de cette recette</a>
     <p class="tres-discret" style="margin-top:12px">Valeurs nutritionnelles approximatives, calculées à partir des ingrédients.</p>
+    ${creditRecette(r) ? `<p class="tres-discret">Photo d’illustration (le plat peut légèrement différer) : ${esc(creditRecette(r).auteur)}, <a href="${esc(creditRecette(r).licenceUrl || creditRecette(r).page)}" target="_blank" rel="noopener" style="color:inherit">${esc(creditRecette(r).licence)}</a>, via <a href="${esc(creditRecette(r).page)}" target="_blank" rel="noopener" style="color:inherit">Wikimedia Commons</a>.</p>` : ''}
   `;
   const changer = (d) => { facteurs[id] = Math.max(0.5, Math.min(4, f + d)); afficherRecette(el, [id]); };
   el.querySelector('#moins').onclick = () => changer(-0.25);

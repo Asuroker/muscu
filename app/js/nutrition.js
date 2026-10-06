@@ -364,6 +364,27 @@ export const TAGS = {
 
 export const recette = (id) => RECETTES.find((r) => r.id === id);
 
+// ---------- Photos (Wikimedia Commons, voir outils/images_recettes.py) ----------
+
+let credits = {};
+export async function chargerCreditsRecettes() {
+  try {
+    credits = await (await fetch('data/credits-recettes.json')).json();
+  } catch {
+    credits = {};
+  }
+}
+export const imageRecette = (r) => (credits[r.id] ? `img/recettes/${r.id}.jpg` : null);
+export const creditRecette = (r) => credits[r.id] || null;
+
+/** Vignette d'une recette : photo si disponible, sinon son emoji. */
+export function vignetteRecette(r) {
+  const src = imageRecette(r);
+  return src
+    ? `<img class="vignette" src="${src}" alt="" loading="lazy">`
+    : `<div class="vignette vide" style="font-size:28px">${r.emoji}</div>`;
+}
+
 /** Valeurs nutritionnelles d'une portion (× facteur). */
 export function macrosRecette(r, facteur = 1) {
   const t = { kcal: 0, p: 0, g: 0, l: 0 };

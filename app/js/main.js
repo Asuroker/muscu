@@ -1,5 +1,6 @@
 import { etat, abonner, esc } from './store.js';
 import { chargerExercices } from './exercices.js';
+import { chargerCreditsRecettes } from './nutrition.js';
 import { aller, chrono } from './nav.js';
 import * as accueil from './vues/accueil.js';
 import * as calendrier from './vues/calendrier.js';
@@ -84,7 +85,7 @@ retour.onclick = () => (history.length > 1 ? history.back() : aller('accueil'));
 async function demarrer() {
   vue.innerHTML = '<div class="chargement"><div class="rond-charge"></div>Chargement…</div>';
   try {
-    await chargerExercices();
+    await Promise.all([chargerExercices(), chargerCreditsRecettes()]);
   } catch (e) {
     vue.innerHTML = '<div class="vide-etat"><div class="grand">📡</div><p>Impossible de charger les exercices. Vérifie ta connexion puis relance l’app.</p></div>';
     return;

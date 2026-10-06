@@ -336,3 +336,8 @@ tr.faite input { color: var(--vert); }
 .ex-carte.replie { padding: 10px 12px; background: color-mix(in srgb, var(--vert) 7%, var(--carte)); }
 .vignette.petite { width: 40px; height: 40px; border-radius: 10px; }
 body.avec-repos main { padding-bottom: calc(var(--onglets-h) + var(--bas-sur) + 110px); }
+
+/* Photo de recette */
+.photo-recette { position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 4 / 3; background: var(--carte-2); }
+.photo-recette img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-recette span { position: absolute; left: 10px; bottom: 10px; font-size: 30px; background: rgba(0,0,0,.45); border-radius: 14px; padding: 4px 8px; }
