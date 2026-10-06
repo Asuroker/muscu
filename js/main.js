@@ -11,6 +11,7 @@ import * as salles from './vues/salles.js';
 import * as recompenses from './vues/recompenses.js';
 import * as objectifs from './vues/objectifs.js';
 import * as nutrition from './vues/nutrition.js';
+import { besoinBienvenue, lancerBienvenue } from './vues/bienvenue.js';
 
 // route -> [module, fonction, onglet, page racine ?]
 const ROUTES = {
@@ -93,6 +94,7 @@ async function demarrer() {
   window.addEventListener('hashchange', () => rendre());
   abonner(() => rendre({ garderDefilement: true }));
   rendre();
+  if (besoinBienvenue()) lancerBienvenue(() => { location.hash = '#/accueil'; rendre(); });
 }
 
 if ('serviceWorker' in navigator) {
