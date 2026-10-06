@@ -1,3 +1,5 @@
+import { assainir } from './validation.js';
+
 // État de l'application, sauvegardé dans le stockage local du téléphone.
 
 const CLE = 'muscu.v1';
@@ -28,11 +30,14 @@ function etatInitial() {
 }
 
 function charger() {
+  let brut = null;
   try {
-    const brut = localStorage.getItem(CLE);
+    brut = localStorage.getItem(CLE);
     if (!brut) return etatInitial();
-    return migrer({ ...etatInitial(), ...JSON.parse(brut) });
+    return migrer(assainir(JSON.parse(brut), etatInitial()));
   } catch {
+    // Données illisibles : on en garde une copie au lieu de les écraser.
+    try { if (brut) localStorage.setItem(CLE + '.illisible', brut); } catch { /* rien */ }
     return etatInitial();
   }
 }
@@ -81,7 +86,7 @@ export function abonner(f) {
 
 export function remplacerEtat(nouveau) {
   Object.keys(etat).forEach((k) => delete etat[k]);
-  Object.assign(etat, migrer({ ...etatInitial(), ...nouveau }));
+  Object.assign(etat, migrer(assainir(nouveau, etatInitial())));
   sauver();
   abonnes.forEach((f) => f());
 }

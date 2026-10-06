@@ -240,7 +240,9 @@ export function afficherReglages(el) {
   el.querySelector('#exporter').onclick = exporter;
   el.querySelector('#importer').onchange = async (e) => {
     const f = e.target.files[0];
+    e.target.value = '';
     if (!f) return;
+    if (f.size > 20 * 1024 * 1024) return toast('Fichier trop volumineux pour une sauvegarde');
     try {
       const donnees = JSON.parse(await f.text());
       if (!Array.isArray(donnees.seances)) throw new Error();

@@ -47,7 +47,7 @@ export function afficher(el) {
     ${carteNiveau()}
 
     ${bons.length ? `<div class="bon cliquable" style="margin-top:10px" data-aller="recompenses">
-      <div class="emoji">${bons[0].emoji}</div>
+      <div class="emoji">${esc(bons[0].emoji)}</div>
       <div class="flex1"><div style="font-weight:700">${bons.length} bon${bons.length > 1 ? 's' : ''} à utiliser</div>
       <div class="discret">${esc(bons.map((b) => b.titre).slice(0, 2).join(', '))}${bons.length > 2 ? '…' : ''}</div></div>
       ${ICONES.chevron}
