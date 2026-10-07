@@ -2,7 +2,7 @@ import { etat, maj, esc, uid } from '../store.js';
 import { entete, aller } from '../nav.js';
 import {
   geocoder, maPosition, chercherSalles, statutOuverture, texteJour, JOURS, horairesVides,
-  lienPlans, lienRechercheHoraires, lireHorairesOsm,
+  lienPlans, nomAppCartes, lienRechercheHoraires, lireHorairesOsm,
 } from '../salles.js';
 import { ICONES, ouvrirFeuille, confirmer, toast } from '../ui.js';
 import { urlSure } from '../validation.js';
@@ -119,7 +119,7 @@ export function afficherSalle(el, [id]) {
 
     <h2>Infos</h2>
     <div class="liste">
-      ${s.lat ? `<a class="item" href="${lienPlans(s)}" target="_blank" rel="noopener">${ICONES.lieu}<div class="flex1">Itinéraire dans Plans</div>${ICONES.chevron}</a>` : ''}
+      ${s.lat ? `<a class="item" href="${lienPlans(s)}" target="_blank" rel="noopener">${ICONES.lieu}<div class="flex1">Itinéraire dans ${nomAppCartes()}</div>${ICONES.chevron}</a>` : ''}
       ${urlSure(s.site) ? `<a class="item" href="${esc(urlSure(s.site))}" target="_blank" rel="noopener">${ICONES.externe}<div class="flex1">Site web</div>${ICONES.chevron}</a>` : ''}
       ${s.tel ? `<a class="item" href="tel:${esc(s.tel.replace(/\s/g, ''))}">📞<div class="flex1">${esc(s.tel)}</div>${ICONES.chevron}</a>` : ''}
       <div class="item" style="cursor:default">🏋️<div class="flex1">${visites.length} séance${visites.length > 1 ? 's' : ''} dans cette salle</div></div>

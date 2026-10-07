@@ -6,7 +6,7 @@ import {
 import { calculerXpSeance, ajouterXp } from '../xp.js';
 import { caloriesSeance } from '../calories.js';
 import { verifierCharges } from '../objectifs.js';
-import { ICONES, ouvrirFeuille, confirmer, toast, vibrer } from '../ui.js';
+import { ICONES, ouvrirFeuille, confirmer, toast, vibrer, pousserCouche } from '../ui.js';
 import { choisirExercice } from './bibliotheque.js';
 import { htmlChoixCategories, brancherChoixCategories } from './categories.js';
 import { celebrer } from './recompenses.js';
@@ -648,7 +648,7 @@ export const texteDuree = (sec) => (sec < 60 ? `${sec} s` : `${Math.floor(sec / 
 const mmss = (sec) => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
 
 function debloquerAudio() {
-  // Sur iPhone, le son doit être activé pendant un geste de l'utilisateur.
+  // Le son doit être activé pendant un geste de l'utilisateur (iPhone et Android).
   try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); audio.resume(); } catch { /* rien */ }
 }
 
@@ -827,6 +827,7 @@ function lancerMinuteurSerie(i, j) {
     <button class="btn btn-principal mg-stop" data-mg="stop">J’arrête (enregistrer mon temps)</button>`;
   document.body.append(el);
   m.el = el;
+  m.retirerCouche = pousserCouche(() => finir(0, false));
 
   const tempsEffort = () => m.ecoule + (m.phase === 'effort' && !m.enPause ? (Date.now() - m.debut) / 1000 : 0);
 
@@ -856,6 +857,7 @@ function lancerMinuteurSerie(i, j) {
     if (minuteurSerie !== m) return;
     clearInterval(m.timer);
     minuteurSerie = null;
+    m.retirerCouche?.();
     el.remove();
     try { m.wake?.release(); } catch { /* rien */ }
     if (tenu >= 1) {

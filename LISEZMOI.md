@@ -1,7 +1,11 @@
 # Application Musculation (« Muscu »)
 
-Web app pour iPhone (PWA) : elle s'ouvre dans Safari puis s'ajoute à l'écran d'accueil.
-Aucun Mac ni compte Apple Developer n'est nécessaire.
+Web app (PWA) pour iPhone et Android, en ligne sur https://asuroker.github.io/muscu/
+- iPhone : ouvrir dans Safari › Partager › Sur l'écran d'accueil.
+- Android : ouvrir dans Chrome › menu ⋮ › Installer l'application (ou bouton « Installer » dans l'app).
+Aucun Mac, compte Apple Developer ni Google Play n'est nécessaire.
+
+Mise en ligne : commit sur `main`, puis `git push origin $(git subtree split --prefix app):gh-pages`.
 
 ## Contenu
 

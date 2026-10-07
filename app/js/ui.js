@@ -31,12 +31,64 @@ export function toast(texte, type = '') {
   setTimeout(() => el.remove(), 2600);
 }
 
+// ---------- Plateforme ----------
+const ua = navigator.userAgent || '';
+export const estIOS = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+export const estAndroid = /android/i.test(ua);
+export const estInstallee = () => window.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone === true;
+
+/** Où conseiller de ranger la sauvegarde selon le téléphone. */
+export const lieuSauvegarde = () => (estIOS ? 'Fichiers › iCloud Drive' : estAndroid ? 'Google Drive (ou Téléchargements)' : 'un dossier en ligne (Drive, iCloud…)');
+
+// ---------- Installation (Chrome / Android) ----------
+let invitationInstallation = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  invitationInstallation = e;
+  window.dispatchEvent(new Event('muscu-installable'));
+});
+window.addEventListener('appinstalled', () => { invitationInstallation = null; });
+export const installationPossible = () => !!invitationInstallation;
+export async function installer() {
+  if (!invitationInstallation) return false;
+  invitationInstallation.prompt();
+  const { outcome } = await invitationInstallation.userChoice;
+  invitationInstallation = null;
+  return outcome === 'accepted';
+}
+
+// ---------- Bouton / geste retour ----------
+// Chaque feuille ou minuteur ouvert ajoute une entrée d'historique : le retour d'Android la ferme
+// au lieu de quitter la page.
+const couches = [];
+export function pousserCouche(fermer) {
+  const c = { fermer };
+  couches.push(c);
+  try { history.pushState({ muscuCouche: true }, ''); } catch { /* rien */ }
+  return () => { const i = couches.indexOf(c); if (i >= 0) couches.splice(i, 1); };
+}
+window.addEventListener('popstate', (e) => {
+  const c = couches.pop();
+  if (c) { c.fermer(); return; }
+  // Entrée laissée par une feuille déjà fermée : on la saute.
+  if (e.state?.muscuCouche) history.back();
+});
+
+let retirerFeuille = null;
+
 /** Ouvre une feuille en bas de l'écran. `remplir(el, fermer)` construit son contenu. */
 export function ouvrirFeuille(remplir) {
   const fond = document.getElementById('feuille');
+  if (retirerFeuille) retirerFeuille();
   fond.innerHTML = '<div class="feuille" role="dialog" aria-modal="true"><div class="poignee"></div><div class="contenu"></div></div>';
   fond.hidden = false;
-  const fermer = () => { fond.hidden = true; fond.innerHTML = ''; fond.onclick = null; };
+  let retirer = null;
+  const fermer = () => {
+    if (retirer) { retirer(); if (retirerFeuille === retirer) retirerFeuille = null; retirer = null; }
+    fond.hidden = true; fond.innerHTML = ''; fond.onclick = null;
+  };
+  retirer = pousserCouche(fermer);
+  retirerFeuille = retirer;
   fond.onclick = (e) => { if (e.target === fond) fermer(); };
   remplir(fond.querySelector('.contenu'), fermer);
   return fermer;

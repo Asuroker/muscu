@@ -3,7 +3,7 @@ import { entete, aller } from '../nav.js';
 import {
   tous, exo, image, normaliser, texteSerie, colonnes, GROUPES, MUSCLES, MATERIEL, CATEGORIES, NIVEAUX, variantes, muscleGroupe,
 } from '../exercices.js';
-import { ICONES, ouvrirFeuille, graphe } from '../ui.js';
+import { ICONES, ouvrirFeuille, graphe, estIOS, estAndroid } from '../ui.js';
 import { ajouterALaSeance } from './seance.js';
 import { htmlFiltreCategorie } from './categories.js';
 import { metExercice, poidsA } from '../calories.js';
@@ -140,7 +140,7 @@ export function afficherExercice(el, [id]) {
     </div>
 
     <h2>Comment faire</h2>
-    ${ex.fr ? '' : '<p class="tres-discret">Consignes disponibles en anglais seulement pour cet exercice. Dans Safari, le bouton « aA » permet de traduire la page.</p>'}
+    ${ex.fr ? '' : `<p class="tres-discret">Consignes disponibles en anglais seulement pour cet exercice. ${estIOS ? 'Dans Safari, le bouton « aA » permet de traduire la page.' : estAndroid ? 'Dans Chrome, menu ⋮ › Traduire permet de traduire la page.' : 'Ton navigateur peut traduire la page.'}</p>`}
     <ol class="etapes" ${ex.fr ? '' : 'lang="en"'}>${ex.t.map((t) => `<li>${esc(t)}</li>`).join('')}</ol>
 
     <h2>${colonnes(ex).mode === 'muscu' ? 'Mes charges' : 'Mon historique'}</h2>

@@ -93,6 +93,10 @@ async function demarrer() {
   }
   window.addEventListener('hashchange', () => rendre());
   abonner(() => rendre({ garderDefilement: true }));
+  // Chrome annonce que l'app est installable un peu après le chargement : on rafraîchit l'écran.
+  window.addEventListener('muscu-installable', () => {
+    if (['accueil', 'reglages'].includes(routeCourante) && document.getElementById('feuille').hidden) rendre({ garderDefilement: true });
+  });
   rendre();
   if (besoinBienvenue()) lancerBienvenue(() => { location.hash = '#/accueil'; rendre(); });
 }
