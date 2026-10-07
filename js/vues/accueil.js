@@ -3,7 +3,7 @@ import { entete, aller } from '../nav.js';
 import { niveauActuel, titreNiveau, seancesSemaine, serieSemaines } from '../xp.js';
 import { statutOuverture } from '../salles.js';
 import { nomGroupe } from '../exercices.js';
-import { ICONES } from '../ui.js';
+import { ICONES, lieuSauvegarde, installationPossible, installer, estInstallee } from '../ui.js';
 import { totalCalories } from '../calories.js';
 import { ajouterPoids, exporter, joursDepuisSauvegarde } from './progres.js';
 import { ajouterSeanceManuelle } from './calendrier.js';
@@ -47,6 +47,7 @@ export function afficher(el) {
 
   el.innerHTML = `
     ${etat.profil?.prenom ? `<div style="font-size:20px;font-weight:750;margin:0 2px 10px">Salut ${esc(etat.profil.prenom)} 👋</div>` : ''}
+    ${bandeauInstallation()}
     ${bandeauSauvegarde()}
     ${carteNiveau()}
 
@@ -143,6 +144,14 @@ export function afficher(el) {
   el.querySelectorAll('[data-aller]').forEach((b) => (b.onclick = (ev) => { ev.stopPropagation(); aller(b.dataset.aller); }));
   document.querySelectorAll('#actions-haut [data-aller]').forEach((b) => (b.onclick = () => aller(b.dataset.aller)));
   el.querySelector('#pesee').onclick = () => ajouterPoids();
+  const inst = el.querySelector('#installer-app');
+  if (inst) {
+    inst.onclick = async () => { await installer(); afficher(el); };
+    el.querySelector('#installer-plus-tard').onclick = () => {
+      try { localStorage.setItem('muscu.installPlusTard', String(Date.now())); } catch { /* rien */ }
+      afficher(el);
+    };
+  }
   const goPrevue = el.querySelector('#go-prevue');
   if (goPrevue) goPrevue.onclick = () => demarrerModele(prevue.id);
   const sauv = el.querySelector('#sauvegarder');
@@ -152,6 +161,23 @@ export function afficher(el) {
   }
   const v = el.querySelector('#visite');
   if (v) v.onclick = () => ajouterSeanceManuelle(jour());
+}
+
+/** Proposition d'installation (Chrome / Android), masquée 7 jours après « Plus tard ». */
+function bandeauInstallation() {
+  if (estInstallee() || !installationPossible()) return '';
+  let plusTard = 0;
+  try { plusTard = +localStorage.getItem('muscu.installPlusTard') || 0; } catch { /* rien */ }
+  if (Date.now() - plusTard < 7 * 86400000) return '';
+  return `<div class="carte" style="margin-bottom:12px;border-color:var(--accent);background:var(--accent-doux)">
+    <div class="ligne"><div style="font-size:28px">📲</div>
+      <div class="flex1"><div style="font-weight:750">Installe Muscu sur ton téléphone</div>
+      <div class="discret">Icône sur l’écran d’accueil, plein écran, fonctionne hors ligne.</div></div></div>
+    <div class="ligne" style="margin-top:10px">
+      <button class="btn btn-principal flex1" id="installer-app">Installer</button>
+      <button class="btn" id="installer-plus-tard">Plus tard</button>
+    </div>
+  </div>`;
 }
 
 /** Rappel si la dernière sauvegarde date de plus de 7 jours (ou n'a jamais été faite). */
@@ -164,7 +190,7 @@ function bandeauSauvegarde() {
       <div style="font-size:28px">💾</div>
       <div class="flex1">
         <div style="font-weight:750">${j === null ? 'Sauvegarde tes données' : `Dernière sauvegarde il y a ${j} jours`}</div>
-        <div class="discret">Tes séances sont seulement sur ce téléphone. Enregistre une copie dans <strong>Fichiers › iCloud Drive</strong>.</div>
+        <div class="discret">Tes séances sont seulement sur ce téléphone. Enregistre une copie dans <strong>${lieuSauvegarde()}</strong>.</div>
       </div>
     </div>
     <div class="ligne" style="margin-top:10px">

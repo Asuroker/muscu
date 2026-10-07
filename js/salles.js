@@ -188,5 +188,8 @@ export function texteJour(plages) {
   return plages.map(([a, b]) => `${a} – ${b}`).join(', ');
 }
 
-export const lienPlans = (s) => `https://maps.apple.com/?q=${encodeURIComponent(s.nom)}&ll=${s.lat},${s.lon}`;
+export const lienPlans = (s) => (/iphone|ipad|ipod/i.test(navigator.userAgent)
+  ? `https://maps.apple.com/?q=${encodeURIComponent(s.nom)}&ll=${s.lat},${s.lon}`
+  : `https://www.google.com/maps/search/?api=1&query=${s.lat},${s.lon}`);
+export const nomAppCartes = () => (/iphone|ipad|ipod/i.test(navigator.userAgent) ? 'Plans' : 'Google Maps');
 export const lienRechercheHoraires = (s) => `https://www.google.com/search?q=${encodeURIComponent(`${s.nom} ${s.ville || ''} horaires`)}`;

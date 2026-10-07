@@ -4,7 +4,7 @@ import {
 import { entete, aller } from '../nav.js';
 import { exo, image, colonnes, texteSerie } from '../exercices.js';
 import { ajouterXp } from '../xp.js';
-import { ICONES, ouvrirFeuille, confirmer, toast, graphe } from '../ui.js';
+import { ICONES, ouvrirFeuille, confirmer, toast, graphe, lieuSauvegarde, estIOS, estAndroid, estInstallee, installationPossible, installer } from '../ui.js';
 import { carteNiveau } from './accueil.js';
 import { celebrer } from './recompenses.js';
 import { totalCalories } from '../calories.js';
@@ -221,22 +221,15 @@ export function afficherReglages(el) {
     </label>
 
     <h2>Sauvegarde</h2>
-    <p class="discret">Tes données restent sur ce téléphone. Exporte-les dans <strong>Fichiers › iCloud Drive</strong> pour ne rien perdre si l’app est supprimée ou si tu changes d’iPhone. L’accueil te le rappelle tous les 7 jours.</p>
+    <p class="discret">Tes données restent sur ce téléphone. Exporte-les dans <strong>${lieuSauvegarde()}</strong> pour ne rien perdre si l’app est supprimée ou si tu changes de téléphone. L’accueil te le rappelle tous les 7 jours.</p>
     <p class="${joursDepuisSauvegarde() === null || joursDepuisSauvegarde() >= 7 ? 'statut-ferme' : 'statut-ouvert'}" style="font-size:14px">${texteDerniereSauvegarde()}</p>
     <div class="pile">
       <button class="btn btn-plein" id="exporter">Exporter mes données</button>
       <label class="btn btn-plein" style="cursor:pointer">Importer une sauvegarde<input type="file" id="importer" accept="application/json,.json" hidden></label>
     </div>
 
-    <h2>Installer sur l’iPhone</h2>
-    <div class="carte">
-      <ol class="etapes" style="margin-top:6px">
-        <li>Ouvre cette page dans <strong>Safari</strong>.</li>
-        <li>Touche le bouton <strong>Partager</strong> (carré avec une flèche).</li>
-        <li>Choisis <strong>Sur l’écran d’accueil</strong>, puis <strong>Ajouter</strong>.</li>
-      </ol>
-      <p class="tres-discret" style="margin:0">L’app s’ouvre alors en plein écran, comme une app normale.</p>
-    </div>
+    <h2>Installer l’application</h2>
+    ${blocInstallation()}
 
     <h2>Zone de danger</h2>
     <button class="btn btn-plein btn-danger" id="reset">Tout effacer</button>
@@ -246,6 +239,8 @@ export function afficherReglages(el) {
   el.querySelectorAll('[data-repos]').forEach((b) => (b.onclick = () => maj((e) => (e.reglages.repos = +b.dataset.repos))));
   el.querySelector('#repos-auto').onchange = (ev) => maj((e) => (e.reglages.reposAuto = ev.target.checked), { silencieux: true });
   el.querySelector('#exporter').onclick = exporter;
+  const inst = el.querySelector('#installer');
+  if (inst) inst.onclick = async () => { if (await installer()) toast('App installée 🎉'); afficherReglages(el); };
   el.querySelector('#importer').onchange = async (e) => {
     const f = e.target.files[0];
     e.target.value = '';
@@ -269,6 +264,26 @@ export function afficherReglages(el) {
   };
 }
 
+/** Explications d'installation selon le téléphone (ou bouton direct sur Android / Chrome). */
+function blocInstallation() {
+  if (estInstallee()) return '<div class="carte">✅ L’app est installée sur ce téléphone.</div>';
+  const iphone = `<div class="carte"><strong>Sur iPhone (Safari)</strong>
+      <ol class="etapes" style="margin-top:8px">
+        <li>Ouvre cette page dans <strong>Safari</strong>.</li>
+        <li>Touche le bouton <strong>Partager</strong> (carré avec une flèche).</li>
+        <li>Choisis <strong>Sur l’écran d’accueil</strong>, puis <strong>Ajouter</strong>.</li>
+      </ol></div>`;
+  const android = `<div class="carte"><strong>Sur Android (Chrome)</strong>
+      <ol class="etapes" style="margin-top:8px">
+        <li>Ouvre cette page dans <strong>Chrome</strong>.</li>
+        <li>Touche le menu <strong>⋮</strong> en haut à droite.</li>
+        <li>Choisis <strong>Installer l’application</strong> (ou <strong>Ajouter à l’écran d’accueil</strong>).</li>
+      </ol></div>`;
+  return `${installationPossible() ? '<button class="btn btn-principal btn-plein" id="installer" style="margin-bottom:10px">📲 Installer l’application</button>' : ''}
+    ${estIOS ? iphone : estAndroid ? android : iphone + android}
+    <p class="tres-discret">L’app s’ouvre alors en plein écran avec son icône, comme une app normale.</p>`;
+}
+
 /** Jours écoulés depuis la dernière sauvegarde (null si jamais). */
 export function joursDepuisSauvegarde() {
   if (!etat.derniereSauvegarde) return null;
@@ -283,7 +298,7 @@ export function texteDerniereSauvegarde() {
 
 const noterSauvegarde = () => maj((e) => { e.derniereSauvegarde = new Date().toISOString(); });
 
-/** Exporte toutes les données dans un fichier (feuille de partage sur iPhone → « Enregistrer dans Fichiers »). */
+/** Exporte toutes les données dans un fichier (feuille de partage : Fichiers sur iPhone, Drive sur Android). */
 export async function exporter() {
   const nom = `muscu-sauvegarde-${jour()}.json`;
   const blob = new Blob([JSON.stringify(etat, null, 1)], { type: 'application/json' });
