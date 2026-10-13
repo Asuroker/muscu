@@ -1,23 +1,49 @@
 // Expérience, niveaux et bons de récompense.
 import { etat, uid, jour, dateDepuisJour, historiqueExercice } from './store.js';
 
-/** XP nécessaire pour passer du niveau n au niveau n + 1. */
-export const besoinNiveau = (n) => 150 + (n - 1) * 75;
+export const NIVEAU_MAX = 55;
+/** 10 prestiges + Maître du prestige (rang 11). */
+export const PRESTIGE_MAX = 11;
 
-export function xpTotal() {
-  return etat.xp.reduce((t, x) => t + x.montant, 0);
+/** XP nécessaire pour passer du niveau n au niveau n + 1 (≈ 15 000 XP du niveau 1 au 55, soit ~50 séances). */
+export const besoinNiveau = (n) => 120 + (n - 1) * 6;
+
+export function xpTotal(e = etat) {
+  return e.xp.reduce((t, x) => t + x.montant, 0);
 }
 
-export function niveauDepuisXp(total) {
-  let niveau = 1, reste = total;
-  while (reste >= besoinNiveau(niveau)) {
+export const rangPrestige = (e = etat) => e.prestige?.rang || 0;
+
+/** XP gagnée depuis le dernier passage de prestige. */
+const xpDuPrestige = (e) => Math.max(0, xpTotal(e) - (e.prestige?.xpDebut || 0));
+
+export function niveauDepuisXp(xp) {
+  let niveau = 1, reste = xp;
+  while (niveau < NIVEAU_MAX && reste >= besoinNiveau(niveau)) {
     reste -= besoinNiveau(niveau);
     niveau++;
   }
-  return { niveau, xpDansNiveau: reste, besoin: besoinNiveau(niveau), total };
+  const max = niveau >= NIVEAU_MAX;
+  return { niveau, xpDansNiveau: max ? besoinNiveau(niveau) : reste, besoin: besoinNiveau(niveau), max, total: xp };
 }
 
-export const niveauActuel = () => niveauDepuisXp(xpTotal());
+/** Niveau dans le prestige actuel ; `total` reste l'XP gagnée depuis le début. */
+export const niveauActuel = (e = etat) => ({ ...niveauDepuisXp(xpDuPrestige(e)), total: xpTotal(e), prestige: rangPrestige(e) });
+
+export const peutPasserPrestige = (e = etat) => niveauActuel(e).max && rangPrestige(e) < PRESTIGE_MAX;
+
+/** Passe au prestige suivant (à appeler dans un maj()). Le niveau repart à 1, tout le reste est gardé. */
+export function passerPrestige(e) {
+  if (!peutPasserPrestige(e)) return null;
+  const rang = rangPrestige(e) + 1;
+  e.prestige = { rang, xpDebut: xpTotal(e), historique: [...(e.prestige?.historique || []), { rang, date: jour() }] };
+  const bon = {
+    id: uid(), titre: rang === PRESTIGE_MAX ? 'Récompense de Maître du prestige : le plus gros plaisir au choix' : 'Récompense de prestige : un gros plaisir au choix',
+    emoji: '👑', niveau: NIVEAU_MAX, gagneLe: new Date().toISOString(), utiliseLe: null,
+  };
+  e.bons.push(bon);
+  return { rang, bon };
+}
 
 export function recompensePourNiveau(niveau) {
   const regles = [...etat.regles].filter((r) => r.tous > 0).sort((a, b) => b.tous - a.tous);
@@ -26,7 +52,8 @@ export function recompensePourNiveau(niveau) {
 
 const TITRES = [
   [1, 'Débutant'], [3, 'Habitué'], [5, 'Régulier'], [8, 'Costaud'], [12, 'Athlète'],
-  [16, 'Machine'], [20, 'Colosse'], [25, 'Titan'], [30, 'Légende'],
+  [16, 'Machine'], [20, 'Colosse'], [25, 'Titan'], [30, 'Légende'], [35, 'Mythe'],
+  [40, 'Demi-dieu'], [45, 'Olympien'], [50, 'Immortel'], [55, 'Légende vivante'],
 ];
 export function titreNiveau(n) {
   let t = TITRES[0][1];
@@ -39,9 +66,9 @@ export function titreNiveau(n) {
  */
 export function ajouterXp(e, montant, raison, date = jour(), extra = {}) {
   if (montant <= 0) return { niveaux: [], bons: [] };
-  const avant = niveauDepuisXp(e.xp.reduce((t, x) => t + x.montant, 0)).niveau;
+  const avant = niveauDepuisXp(xpDuPrestige(e)).niveau;
   e.xp.push({ date, montant, raison, ...extra });
-  const apres = niveauDepuisXp(e.xp.reduce((t, x) => t + x.montant, 0)).niveau;
+  const apres = niveauDepuisXp(xpDuPrestige(e)).niveau;
   const niveaux = [], bons = [];
   for (let n = avant + 1; n <= apres; n++) {
     niveaux.push(n);
@@ -103,4 +130,23 @@ export function serieSemaines() {
   if (!semaines.has(jour(d))) d.setDate(d.getDate() - 7); // la semaine en cours peut encore venir
   while (semaines.has(jour(d))) { n++; d.setDate(d.getDate() - 7); }
   return n;
+}
+
+/**
+ * Passage à la courbe 1-55 (version 3 des données) : si l'XP déjà gagnée donne maintenant
+ * plus de niveaux qu'avant, on offre les bons de ces niveaux. À appeler dans un maj().
+ */
+export function migrerCourbe(e) {
+  if ((e.version || 1) >= 3) return 0;
+  const total = xpTotal(e);
+  let ancien = 1, reste = total;
+  while (reste >= 150 + (ancien - 1) * 75) { reste -= 150 + (ancien - 1) * 75; ancien++; }
+  const nouveau = niveauDepuisXp(total).niveau;
+  let offerts = 0;
+  for (let n = ancien + 1; n <= nouveau; n++) {
+    const r = recompensePourNiveau(n);
+    if (r) { e.bons.push({ id: uid(), titre: r.titre, emoji: r.emoji, niveau: n, gagneLe: new Date().toISOString(), utiliseLe: null }); offerts++; }
+  }
+  e.version = 3;
+  return offerts;
 }

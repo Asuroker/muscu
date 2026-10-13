@@ -1,6 +1,7 @@
 import { etat, maj, esc, dateCourte, jour } from '../store.js';
 import { entete } from '../nav.js';
-import { niveauActuel, recompensePourNiveau, titreNiveau } from '../xp.js';
+import { niveauActuel, recompensePourNiveau, titreNiveau, peutPasserPrestige, passerPrestige, NIVEAU_MAX, PRESTIGE_MAX } from '../xp.js';
+import { embleme, nomPrestige, PRESTIGES } from '../prestige.js';
 import { ICONES, ouvrirFeuille, confirmer, toast } from '../ui.js';
 import { carteNiveau } from './accueil.js';
 import { fmtKcal } from '../calories.js';
@@ -12,7 +13,8 @@ export function afficher(el) {
   const dispo = etat.bons.filter((b) => !b.utiliseLe).sort((a, b) => a.niveau - b.niveau);
   const utilises = etat.bons.filter((b) => b.utiliseLe).sort((a, b) => b.utiliseLe.localeCompare(a.utiliseLe));
   const n = niveauActuel().niveau;
-  const prochains = Array.from({ length: 5 }, (_, i) => n + 1 + i).map((niv) => ({ niv, r: recompensePourNiveau(niv) })).filter((x) => x.r);
+  const prochains = Array.from({ length: 5 }, (_, i) => n + 1 + i).filter((niv) => niv <= NIVEAU_MAX).map((niv) => ({ niv, r: recompensePourNiveau(niv) })).filter((x) => x.r);
+  const rang = niveauActuel().prestige;
 
   el.innerHTML = `
     ${carteNiveau()}
@@ -24,6 +26,17 @@ export function afficher(el) {
         <button class="btn btn-petit btn-or" data-utiliser="${b.id}">Utiliser</button>
       </div>`).join('')}</div>`
       : '<p class="discret">Pas de bon pour le moment. Va à la salle pour gagner de l’XP et monter de niveau 💪</p>'}
+
+    <h2>🎖️ Prestige</h2>
+    <p class="discret">Au niveau ${NIVEAU_MAX}, passe prestige : ton niveau repart à 1, tu gardes tout le reste et tu débloques un nouvel emblème (+ un bon 👑).</p>
+    <div class="galerie-prestige">${PRESTIGES.slice(1).map((p, i) => {
+      const r = i + 1, debloque = r <= rang;
+      return `<div class="case-prestige${r === rang ? ' actuel' : ''}">
+        ${embleme(r, 70, { verrouille: !debloque })}
+        <div class="nom">${debloque ? '' : '🔒 '}${esc(p.nom)}</div>
+        <div class="tres-discret">${esc(p.detail)}</div>
+      </div>`;
+    }).join('')}</div>
 
     <h2>Prochaines récompenses</h2>
     <div class="liste">${prochains.map(({ niv, r }) => `<div class="item" style="cursor:default">
@@ -117,3 +130,49 @@ export function celebrer({ lignes = [], total = 0, niveaux = [], bons = [], kcal
     el.querySelector('#c-ok').onclick = fermer;
   });
 }
+
+/** Confirmation puis passage au prestige suivant. */
+export function demanderPrestige() {
+  if (!peutPasserPrestige()) return;
+  const suivant = niveauActuel().prestige + 1;
+  ouvrirFeuille((el, fermer) => {
+    el.innerHTML = `<div class="centre">${embleme(suivant, 130)}</div>
+      <h2 class="centre">Passer ${esc(nomPrestige(suivant))} ?</h2>
+      <p class="discret">Ton niveau repart à <strong>1</strong>. Tu gardes tout : séances, charges, objectifs, bons et ton total d’XP.
+      Tu débloques l’emblème <strong>${esc(PRESTIGES[suivant].detail)}</strong> et un bon 👑.</p>
+      <div class="pile">
+        <button class="btn btn-or btn-plein" id="ok-prestige">🎖️ Passer prestige</button>
+        <button class="btn btn-plein" id="plus-tard">Plus tard</button>
+      </div>`;
+    el.querySelector('#plus-tard').onclick = fermer;
+    el.querySelector('#ok-prestige').onclick = () => {
+      let res = null;
+      maj((e) => { res = passerPrestige(e); });
+      fermer();
+      if (res) celebrerPrestige(res);
+    };
+  });
+}
+
+function celebrerPrestige({ rang, bon }) {
+  ouvrirFeuille((el, fermer) => {
+    el.innerHTML = `<div class="celebration">
+        <div class="embleme-brillant">${embleme(rang, 170)}</div>
+        <div class="texte-prestige" style="font-size:26px;font-weight:900;margin-top:10px">${esc(nomPrestige(rang))}</div>
+        <div class="discret">${rang === PRESTIGE_MAX ? 'Tu as atteint le sommet. Légende absolue.' : `Emblème ${esc(PRESTIGES[rang].detail)} débloqué · retour au niveau 1`}</div>
+      </div>
+      <div class="bon" style="margin-top:14px"><div class="emoji">${esc(bon.emoji)}</div><div class="flex1"><div style="font-weight:750">${esc(bon.titre)}</div><div class="tres-discret">À utiliser quand tu veux</div></div></div>
+      <button class="btn btn-principal btn-plein" id="c-ok" style="margin-top:16px">C’est reparti ! 💪</button>`;
+    el.querySelector('#c-ok').onclick = fermer;
+  });
+}
+
+// Le bouton « Passer prestige » est dans la carte de niveau (affichée sur plusieurs écrans) :
+// on l'écoute une seule fois, avant le clic de la carte elle-même.
+document.addEventListener('click', (e) => {
+  const b = e.target.closest?.('[data-prestige]');
+  if (!b) return;
+  e.stopPropagation();
+  e.preventDefault();
+  demanderPrestige();
+}, true);

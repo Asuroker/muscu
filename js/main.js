@@ -2,6 +2,8 @@ import { etat, abonner, esc } from './store.js';
 import { chargerExercices } from './exercices.js';
 import { chargerCreditsRecettes } from './nutrition.js';
 import { aller, chrono } from './nav.js';
+import { migrerCourbe } from './xp.js';
+import { maj } from './store.js';
 import * as accueil from './vues/accueil.js';
 import * as calendrier from './vues/calendrier.js';
 import * as seance from './vues/seance.js';
@@ -87,6 +89,7 @@ async function demarrer() {
   vue.innerHTML = '<div class="chargement"><div class="rond-charge"></div>Chargement…</div>';
   try {
     await Promise.all([chargerExercices(), chargerCreditsRecettes()]);
+    maj((e) => migrerCourbe(e), { silencieux: true });
   } catch (e) {
     vue.innerHTML = '<div class="vide-etat"><div class="grand">📡</div><p>Impossible de charger les exercices. Vérifie ta connexion puis relance l’app.</p></div>';
     return;

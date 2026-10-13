@@ -108,6 +108,11 @@ export function assainir(brut, base) {
       .filter((r) => r.titre).slice(0, 30);
   }
   res.enCours = enCours(d.enCours);
+  const pr = objet(d.prestige);
+  res.prestige = pr ? {
+    rang: Math.round(nombre(pr.rang, 0, 11, 0)), xpDebut: nombre(pr.xpDebut, 0, 1e9, 0),
+    historique: tableau(pr.historique).map(objet).filter((h) => h && jour(h.date)).map((h) => ({ rang: Math.round(nombre(h.rang, 1, 11, 1)), date: h.date })).slice(0, 20),
+  } : { rang: 0, xpDebut: 0, historique: [] };
   res.modeles = tableau(d.modeles).map(objet).filter((m) => m && id(m.id)).map((m) => ({
     id: m.id, nom: texte(m.nom, 60) || 'Ma séance', date: jour(m.date), creeLe: dateIso(m.creeLe) || new Date().toISOString(),
     types: tableau(m.types).map(id).filter(Boolean).slice(0, 20), dureeVisee: nombre(m.dureeVisee, 0, 600, 60),
