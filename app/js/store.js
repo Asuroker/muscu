@@ -6,7 +6,7 @@ const CLE = 'muscu.v1';
 
 function etatInitial() {
   return {
-    version: 2,
+    version: 3,
     creeLe: new Date().toISOString(),
     salles: [],          // {id, nom, marque, ville, adresse, lat, lon, osm, site, horairesOsm, horaires}
     salleParDefaut: null,
@@ -23,7 +23,8 @@ function etatInitial() {
       { tous: 1, emoji: '🥤', titre: 'Boisson sucrée' },
     ],
     enCours: null,       // séance en cours (même structure qu'une séance + debutTs)
-    modeles: [],         // séances enregistrées à l'avance {id, nom, date|null, types[], dureeVisee, exercices[], creeLe}
+    modeles: [],
+    prestige: { rang: 0, xpDebut: 0, historique: [] },         // séances enregistrées à l'avance {id, nom, date|null, types[], dureeVisee, exercices[], creeLe}
     reglages: { repos: 90 },
     objectifs: { poids: null, charges: [] },
     profil: null,

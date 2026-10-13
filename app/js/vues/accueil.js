@@ -1,6 +1,7 @@
 import { etat, maj, esc, jour, duree, kg, salle, seancesTriees, dateCourte } from '../store.js';
 import { entete, aller } from '../nav.js';
-import { niveauActuel, titreNiveau, seancesSemaine, serieSemaines } from '../xp.js';
+import { niveauActuel, titreNiveau, seancesSemaine, serieSemaines, peutPasserPrestige, NIVEAU_MAX, PRESTIGE_MAX } from '../xp.js';
+import { embleme, nomPrestige } from '../prestige.js';
 import { statutOuverture } from '../salles.js';
 import { nomGroupe } from '../exercices.js';
 import { ICONES, lieuSauvegarde, installationPossible, installer, estInstallee } from '../ui.js';
@@ -14,18 +15,26 @@ import { besoins, OBJECTIFS_NUTRI, RECETTES, TYPES_REPAS, imageRecette } from '.
 export function carteNiveau() {
   const n = niveauActuel();
   const pct = Math.round((n.xpDansNiveau / n.besoin) * 100);
+  const badge = n.prestige
+    ? `<div class="badge-prestige">${embleme(n.prestige, 64)}<span>${n.niveau}</span></div>`
+    : `<div class="badge-niveau"><div><small>NIV.</small>${n.niveau}</div></div>`;
   return `<div class="carte-niveau cliquable" data-aller="recompenses">
     <div class="ligne">
-      <div class="badge-niveau"><div><small>NIV.</small>${n.niveau}</div></div>
+      ${badge}
       <div class="flex1">
         <div style="font-weight:800;font-size:19px">${esc(titreNiveau(n.niveau))}</div>
-        <div class="discret">${n.total} XP au total</div>
+        <div class="discret">${n.prestige ? `<strong class="texte-prestige">${esc(nomPrestige(n.prestige))}</strong> · ` : ''}Niveau ${n.niveau} / ${NIVEAU_MAX} · ${n.total.toLocaleString('fr-FR')} XP</div>
       </div>
     </div>
-    <div class="barre-xp"><div style="width:${pct}%"></div></div>
-    <div class="ligne-entre tres-discret" style="margin-top:6px">
-      <span>${n.xpDansNiveau} / ${n.besoin} XP</span><span>encore ${n.besoin - n.xpDansNiveau} XP pour le niveau ${n.niveau + 1}</span>
-    </div>
+    <div class="barre-xp${n.max ? ' max' : ''}"><div style="width:${pct}%"></div></div>
+    ${n.max
+      ? `<div class="tres-discret" style="margin-top:6px">Niveau maximum atteint 🔥</div>
+         ${peutPasserPrestige()
+           ? `<button class="btn btn-or btn-plein" data-prestige style="margin-top:10px">🎖️ Passer ${esc(nomPrestige(n.prestige + 1))}</button>`
+           : `<div style="margin-top:6px;font-weight:750">Tu es ${esc(nomPrestige(PRESTIGE_MAX))} 👑 Respect.</div>`}`
+      : `<div class="ligne-entre tres-discret" style="margin-top:6px">
+          <span>${n.xpDansNiveau} / ${n.besoin} XP</span><span>encore ${n.besoin - n.xpDansNiveau} XP pour le niveau ${n.niveau + 1}</span>
+        </div>`}
   </div>`;
 }
 

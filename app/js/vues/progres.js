@@ -3,7 +3,7 @@ import {
 } from '../store.js';
 import { entete, aller } from '../nav.js';
 import { exo, image, colonnes, texteSerie } from '../exercices.js';
-import { ajouterXp } from '../xp.js';
+import { ajouterXp, migrerCourbe } from '../xp.js';
 import { ICONES, ouvrirFeuille, confirmer, toast, graphe, lieuSauvegarde, estIOS, estAndroid, estInstallee, installationPossible, installer } from '../ui.js';
 import { carteNiveau } from './accueil.js';
 import { celebrer } from './recompenses.js';
@@ -251,6 +251,7 @@ export function afficherReglages(el) {
       if (!Array.isArray(donnees.seances)) throw new Error();
       if (!(await confirmer(`Remplacer tes données actuelles par cette sauvegarde (${donnees.seances.length} séances) ?`, { ok: 'Importer' }))) return;
       remplacerEtat(donnees);
+      maj((d) => migrerCourbe(d));
       toast('Sauvegarde importée');
     } catch {
       toast('Fichier de sauvegarde invalide');

@@ -385,3 +385,28 @@ body.en-bienvenue { overflow: hidden; }
 /* Catégories musculaires : une ligne par groupe */
 .ligne-cat { margin-top: 6px; }
 .ligne-cat > span { display: block; margin: 0 2px 2px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; font-size: 11px; }
+
+/* Prestige */
+/* Les icônes de l'app imposent taille et trait à tous les SVG : l'emblème garde les siens. */
+.embleme { display: block; filter: drop-shadow(0 4px 8px rgba(0,0,0,.45)); flex-shrink: 0; stroke: none; fill: none; stroke-width: 1; }
+.embleme.verrouille { filter: grayscale(1) brightness(.55); opacity: .45; }
+.badge-prestige { position: relative; width: 64px; height: 64px; flex-shrink: 0; }
+.badge-prestige span {
+  position: absolute; right: -6px; bottom: -4px; min-width: 26px; height: 22px; padding: 0 6px; border-radius: 11px;
+  background: linear-gradient(145deg, var(--or), var(--accent)); color: #1a0d00; font-weight: 900; font-size: 13px;
+  display: grid; place-items: center; box-shadow: 0 2px 6px rgba(0,0,0,.4);
+}
+.texte-prestige { background: linear-gradient(90deg, #d29e26, #fff3b5, #c18d1b); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.barre-xp.max > div { background: linear-gradient(90deg, #d29e26, #fff3b5, #d29e26); }
+.galerie-prestige { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.case-prestige { background: var(--carte); border: 1px solid var(--bord); border-radius: 14px; padding: 10px 4px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; }
+.case-prestige.actuel { border-color: var(--or); box-shadow: 0 0 0 1px var(--or) inset; }
+.case-prestige .nom { font-weight: 750; font-size: 13px; }
+.embleme-brillant { position: relative; display: inline-block; animation: saute .7s ease-out; }
+.embleme-brillant::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen;
+  background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.75) 50%, transparent 65%);
+  background-size: 250% 100%; animation: reflet 2.4s ease-in-out .4s infinite;
+  -webkit-mask: radial-gradient(circle, #000 60%, transparent 72%); mask: radial-gradient(circle, #000 60%, transparent 72%);
+}
+@keyframes reflet { from { background-position: 150% 0; } to { background-position: -100% 0; } }
