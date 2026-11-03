@@ -97,8 +97,15 @@ export function seancesSemaine(s, seances = etat.seances) {
 /** Détail de l'XP gagnée pour une séance (avant qu'elle soit ajoutée à l'état). */
 export function calculerXpSeance(seance) {
   const lignes = [];
+  if (seance.marche) {
+    // Marche dehors : un peu d'XP pour bouger, surtout selon le nombre de pas.
+    const pas = seance.marche.pas || Math.round(((seance.marche.km || 0) * 1000) / 0.75);
+    lignes.push({ lib: 'Marche dehors 🚶', xp: 15 });
+    if (pas >= 1000) lignes.push({ lib: `${pas.toLocaleString('fr-FR')} pas`, xp: Math.min(80, Math.floor(pas / 1000) * 4) });
+    return { lignes, total: lignes.reduce((t, l) => t + l.xp, 0), records: 0 };
+  }
   lignes.push({ lib: 'Séance à la salle', xp: 50 });
-  if (!etat.seances.length) lignes.push({ lib: 'Toute première séance 🎉', xp: 100 });
+  if (!etat.seances.some((s) => !s.marche)) lignes.push({ lib: 'Toute première séance 🎉', xp: 100 });
   const minutes = Math.min(120, Math.round(seance.duree || 0));
   if (minutes > 0) lignes.push({ lib: `${minutes} min d'entraînement`, xp: minutes });
   const series = (seance.exercices || []).reduce((t, ex) => t + ex.series.filter((x) => x.faite).length, 0);
@@ -115,7 +122,7 @@ export function calculerXpSeance(seance) {
   }
   if (records) lignes.push({ lib: `${records} nouveau${records > 1 ? 'x' : ''} record${records > 1 ? 's' : ''}`, xp: records * 25 });
 
-  const dejaSemaine = seancesSemaine(seance.date).filter((x) => x.id !== seance.id).length;
+  const dejaSemaine = seancesSemaine(seance.date).filter((x) => x.id !== seance.id && !x.marche).length; // les marches ne comptent pas
   if (dejaSemaine === 2) lignes.push({ lib: '3e séance de la semaine 🔥', xp: 50 });
 
   return { lignes, total: lignes.reduce((t, l) => t + l.xp, 0), records };

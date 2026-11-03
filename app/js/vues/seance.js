@@ -9,6 +9,7 @@ import { verifierCharges } from '../objectifs.js';
 import { ICONES, ouvrirFeuille, confirmer, toast, vibrer, pousserCouche } from '../ui.js';
 import { choisirExercice } from './bibliotheque.js';
 import { htmlChoixCategories, brancherChoixCategories } from './categories.js';
+import { ajouterMarche } from './marche.js';
 import { programmerRepos, annulerRepos, notifActives, notifPossibles, activerNotifications, desactiverNotifications } from '../notifications.js';
 import { estIOS, estInstallee } from '../ui.js';
 import { celebrer } from './recompenses.js';
@@ -116,6 +117,7 @@ function afficherPreparation(el) {
 
     <div class="separateur"></div>
     <button class="btn btn-plein" id="libre">${ICONES.horloge} Séance libre (je choisis au fur et à mesure)</button>
+    <button class="btn btn-plein" id="marche" style="margin-top:10px">🚶 Marche dehors (nombre de pas)</button>
   `;
 
   brancherChoixCategories(el.querySelector('#choix-cat'), b.types, () => afficherPreparation(el));
@@ -148,6 +150,7 @@ function afficherPreparation(el) {
     el.querySelector('#proposition').scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   el.querySelector('#libre').onclick = () => demarrer([]);
+  el.querySelector('#marche').onclick = () => ajouterMarche(jour());
   el.querySelector('#vide').onclick = () => {
     b.proposition = [];
     afficherPreparation(el);

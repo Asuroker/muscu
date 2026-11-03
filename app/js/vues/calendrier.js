@@ -7,6 +7,7 @@ import { ICONES, ouvrirFeuille, confirmer, toast } from '../ui.js';
 import { celebrer } from './recompenses.js';
 import { demarrerModele, planifierPour } from './seance.js';
 import { htmlChoixCategories, brancherChoixCategories } from './categories.js';
+import { ajouterMarche, texteMarche } from './marche.js';
 
 const MOIS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
 let mois = null;      // Date du 1er du mois affiché
@@ -66,7 +67,8 @@ export function afficher(el) {
     ${ceJour.length ? `<div class="liste">${ceJour.map(ligneSeance).join('')}</div>`
       : prevusCeJour.length ? '' : `<p class="discret">Pas de séance ce jour-là.</p>`}
     ${choisi >= auj ? `<button class="btn btn-plein" id="planifier" style="margin-top:12px">📌 Planifier une séance ce jour</button>` : ''}
-    ${choisi <= auj ? `<button class="btn btn-plein" id="ajout" style="margin-top:12px">${ICONES.plus} Noter une séance faite ce jour</button>` : ''}
+    ${choisi <= auj ? `<button class="btn btn-plein" id="ajout" style="margin-top:12px">${ICONES.plus} Noter une séance faite ce jour</button>
+      <button class="btn btn-plein" id="ajout-marche" style="margin-top:10px">🚶 Noter une marche ce jour</button>` : ''}
   `;
 
   el.querySelector('#prec').onclick = () => { mois.setMonth(mois.getMonth() - 1); afficher(el); };
@@ -80,6 +82,8 @@ export function afficher(el) {
   el.querySelectorAll('[data-seance]').forEach((b) => (b.onclick = () => aller('seance-detail/' + b.dataset.seance)));
   const ajout = el.querySelector('#ajout');
   if (ajout) ajout.onclick = () => ajouterSeanceManuelle(choisi);
+  const marcheJour = el.querySelector('#ajout-marche');
+  if (marcheJour) marcheJour.onclick = () => ajouterMarche(choisi);
   const planifier = el.querySelector('#planifier');
   if (planifier) planifier.onclick = () => planifierPour(choisi);
   el.querySelectorAll('[data-go]').forEach((b) => (b.onclick = (ev) => { ev.stopPropagation(); demarrerModele(b.dataset.go); }));
@@ -94,7 +98,7 @@ function ligneSeance(s) {
     <div class="vignette vide" style="font-weight:800;font-size:13px;color:var(--accent)">${esc(s.debut)}</div>
     <div class="flex1">
       <div class="titre">${esc((s.types || []).map(nomGroupe).join(' · ') || 'Séance')}</div>
-      <div class="sous">${duree(s.duree)} · 🔥 ${fmtKcal(caloriesSeance(s).total)}${sa ? ' · ' + esc(sa.nom) : ''}${nbEx ? ` · ${nbEx} exercice${nbEx > 1 ? 's' : ''}` : ''}</div>
+      <div class="sous">${s.marche ? esc(texteMarche(s)) + ' · ' : ''}${duree(s.duree)} · 🔥 ${fmtKcal(caloriesSeance(s).total)}${sa ? ' · ' + esc(sa.nom) : ''}${nbEx ? ` · ${nbEx} exercice${nbEx > 1 ? 's' : ''}` : ''}</div>
     </div>
     ${ICONES.chevron}
   </div>`;
@@ -119,6 +123,8 @@ export function afficherSeance(el, [id]) {
     <div class="carte">
       <div style="font-weight:800;font-size:18px">${dateLongue(s.date)}</div>
       <div class="discret">${esc(s.debut)} – ${finDe(s)} · ${duree(s.duree)}</div>
+      ${s.marche ? `<div style="font-size:22px;font-weight:850;margin-top:8px">🚶 ${esc(texteMarche(s))}</div>
+        ${s.marche.km && s.duree ? `<div class="tres-discret">${String(Math.round((s.marche.km / (s.duree / 60)) * 10) / 10).replace('.', ',')} km/h de moyenne${s.marche.source === 'sante' ? ' · pas importés depuis Santé' : ''}</div>` : ''}` : ''}
       ${sa ? `<div class="ligne" style="margin-top:8px;cursor:pointer" data-aller="salle/${sa.id}">${ICONES.lieu}<span>${esc(sa.nom)}</span></div>` : ''}
       <div class="puces" style="margin-top:10px">
         ${(s.types || []).map((t) => `<span class="etiquette">${esc(nomGroupe(t))}</span>`).join('')}
@@ -133,12 +139,12 @@ export function afficherSeance(el, [id]) {
     </div>
     <p class="tres-discret" style="margin-top:6px">${kcal.estime
       ? 'Calories estimées pour 75 kg : <a href="#/poids" style="color:var(--accent)">ajoute ta pesée</a> pour un calcul précis.'
-      : `Calories estimées pour ${String(kcal.poids).replace('.', ',')} kg, d’après tes séries, charges et exercices.`}</p>
+      : `Calories estimées pour ${String(kcal.poids).replace('.', ',')} kg, d’après ${s.marche ? 'ta distance et ta durée' : 'tes séries, charges et exercices'}.`}</p>
     ${(s.exercices || []).length ? `<h2>Exercices</h2>${s.exercices.map((e, i) => carteExercice(e, kcal.parExercice[i])).join('')}` : ''}
     <button class="btn btn-plein btn-danger" id="suppr" style="margin-top:20px">${ICONES.poubelle} Supprimer la séance</button>
   `;
   el.querySelectorAll('[data-aller]').forEach((b) => (b.onclick = () => aller(b.dataset.aller)));
-  document.getElementById('modif').onclick = () => ajouterSeanceManuelle(s.date, s);
+  document.getElementById('modif').onclick = () => (s.marche ? ajouterMarche(s.date, s) : ajouterSeanceManuelle(s.date, s));
   el.querySelector('#suppr').onclick = async () => {
     if (!(await confirmer('Supprimer cette séance ? L’XP gagnée avec elle sera retirée.', { ok: 'Supprimer', danger: true }))) return;
     maj((e) => {
