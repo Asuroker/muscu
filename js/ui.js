@@ -80,7 +80,8 @@ let retirerFeuille = null;
 export function ouvrirFeuille(remplir) {
   const fond = document.getElementById('feuille');
   if (retirerFeuille) retirerFeuille();
-  fond.innerHTML = '<div class="feuille" role="dialog" aria-modal="true"><div class="poignee"></div><div class="contenu"></div></div>';
+  fond.innerHTML = '<div class="feuille" role="dialog" aria-modal="true"><div class="feuille-haut"><div class="poignee"></div>'
+    + '<button class="feuille-fermer" type="button" aria-label="Fermer">✕</button></div><div class="contenu"></div></div>';
   fond.hidden = false;
   let retirer = null;
   const fermer = () => {
@@ -90,6 +91,7 @@ export function ouvrirFeuille(remplir) {
   retirer = pousserCouche(fermer);
   retirerFeuille = retirer;
   fond.onclick = (e) => { if (e.target === fond) fermer(); };
+  fond.querySelector('.feuille-fermer').onclick = fermer;
   remplir(fond.querySelector('.contenu'), fermer);
   return fermer;
 }
