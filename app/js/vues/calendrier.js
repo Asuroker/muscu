@@ -133,7 +133,7 @@ export function afficherSeance(el, [id]) {
     </div>
     <p class="tres-discret" style="margin-top:6px">${kcal.estime
       ? 'Calories estimées pour 75 kg : <a href="#/poids" style="color:var(--accent)">ajoute ta pesée</a> pour un calcul précis.'
-      : `Calories estimées pour ${String(kcal.poids).replace('.', ',')} kg (méthode MET).`}</p>
+      : `Calories estimées pour ${String(kcal.poids).replace('.', ',')} kg, d’après tes séries, charges et exercices.`}</p>
     ${(s.exercices || []).length ? `<h2>Exercices</h2>${s.exercices.map((e, i) => carteExercice(e, kcal.parExercice[i])).join('')}` : ''}
     <button class="btn btn-plein btn-danger" id="suppr" style="margin-top:20px">${ICONES.poubelle} Supprimer la séance</button>
   `;

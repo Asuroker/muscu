@@ -410,3 +410,8 @@ body.en-bienvenue { overflow: hidden; }
   -webkit-mask: radial-gradient(circle, #000 60%, transparent 72%); mask: radial-gradient(circle, #000 60%, transparent 72%);
 }
 @keyframes reflet { from { background-position: 150% 0; } to { background-position: -100% 0; } }
+
+/* Barres fixées en bas : couche dédiée pour qu'iOS les repositionne correctement après le clavier
+   ou un retour dans l'app (voir recalerAffichage dans ui.js). */
+.onglets, .repos, #bandeau-seance { transform: translateZ(0); will-change: transform; top: auto; }
+body.recale .onglets, body.recale .repos, body.recale #bandeau-seance { transform: translate3d(0, 0, 0); }
