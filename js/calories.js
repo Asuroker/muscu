@@ -1,7 +1,7 @@
 // Estimation des calories dépensées : kcal = MET × poids (kg) × durée (h).
 // Valeurs MET tirées du Compendium of Physical Activities (Ainsworth et al.).
 import { etat } from './store.js';
-import { exo, colonnes, estGainage } from './exercices.js';
+import { exo, colonnes, estGainage, famille } from './exercices.js';
 
 export const POIDS_PAR_DEFAUT = 75;
 
@@ -60,48 +60,67 @@ function metGeneral(types = []) {
 
 const kcal = (met, kg, minutes) => (met * kg * minutes) / 60;
 
+// ---------- Musculation : calcul série par série ----------
+// Amplitude du mouvement (m) selon la famille de l'exercice.
+const AMPLITUDE = {
+  squat: 0.6, presse: 0.45, souleve: 0.55, fentes: 0.45, 'hip-thrust': 0.3, 'leg-extension': 0.4, 'leg-curl': 0.35,
+  mollets: 0.12, developpe: 0.4, 'developpe-epaules': 0.5, dips: 0.45, pompes: 0.35, 'tirage-vertical': 0.5,
+  rowing: 0.4, 'rowing-menton': 0.4, shrug: 0.1, curl: 0.4, 'triceps-extension': 0.35, ecartes: 0.4, pullover: 0.45,
+  'elevation-laterale': 0.5, 'elevation-frontale': 0.5, oiseau: 0.45, crunch: 0.25, 'releve-jambes': 0.35, poignets: 0.08,
+};
+// Part du poids du corps déplacée pour les exercices sans charge (le lest saisi s'y ajoute).
+const PART_DU_CORPS = {
+  'tirage-vertical': 0.95, dips: 0.9, pompes: 0.65, squat: 0.7, fentes: 0.7, crunch: 0.3, 'releve-jambes': 0.3, 'hip-thrust': 0.5,
+};
+const RENDEMENT_MUSCULAIRE = 0.22; // ~22 % de l'énergie devient du travail mécanique
+const SECONDES_PAR_REP = 3;
+const RECUPERATION_S = 45; // dépense un peu supérieure au repos juste après chaque série
+const MET_RECUPERATION = 2.5;
+
+/** Calories d'une série de musculation : effort + travail mécanique + récupération. */
+export function kcalSerie(ex, serie, poidsCorps) {
+  const reps = Math.max(0, serie.reps || 0);
+  if (!reps) return 0;
+  const fam = famille(ex);
+  const corps = ex.e === 'body only' ? (PART_DU_CORPS[fam] ?? 0.4) * poidsCorps : 0;
+  const charge = corps + Math.max(0, serie.kg || 0);
+  const dureeEffort = Math.max(20, reps * SECONDES_PAR_REP + 10); // secondes
+  const effort = (metExercice(ex) * poidsCorps * dureeEffort) / 3600;
+  const travail = (charge * 9.81 * (AMPLITUDE[fam] ?? 0.4) * reps * 1.3) / (4184 * RENDEMENT_MUSCULAIRE);
+  const recuperation = (MET_RECUPERATION * poidsCorps * RECUPERATION_S) / 3600;
+  return effort + travail + recuperation;
+}
+
 /**
- * Calories d'une séance.
- * `seance.duree` (minutes) est le temps total ; `seuleValidees` ne compte que les séries cochées.
+ * Calories d'une séance, calculées à partir des séries validées :
+ *  - musculation : série par série (exercice, charge, répétitions) ;
+ *  - cardio, gainage, étirements : durée saisie × intensité.
+ * Une séance sans aucune série (visite notée à la main) est estimée d'après sa durée,
+ * sauf si `parTemps` est faux (séance en cours : rien ne compte tant qu'aucune série n'est validée).
  * Retourne { total, parExercice: [kcal par exercice, même ordre], poids, estime }.
  */
-export function caloriesSeance(seance, { seuleValidees = true } = {}) {
+export function caloriesSeance(seance, { seuleValidees = true, parTemps = true } = {}) {
   const { kg, estime } = poidsA(seance.date);
-  const duree = Math.max(0, seance.duree || 0);
   const exercices = seance.exercices || [];
   const parExercice = exercices.map(() => 0);
+  let nbSeries = 0;
 
-  // 1. Cardio et étirements : leur durée est saisie.
-  let minutesExplicites = 0;
-  const muscu = [];
   exercices.forEach((e, i) => {
     const ex = exo(e.exId);
     const series = e.series.filter((x) => !seuleValidees || x.faite);
+    nbSeries += series.length;
     const mode = colonnes(ex).mode;
     if (mode === 'cardio') {
-      series.forEach((x) => {
-        const min = x.reps || 0;
-        minutesExplicites += min;
-        parExercice[i] += kcal(metExercice(ex, { minutes: min, km: x.kg || 0 }), kg, min);
-      });
+      series.forEach((x) => (parExercice[i] += kcal(metExercice(ex, { minutes: x.reps || 0, km: x.kg || 0 }), kg, x.reps || 0)));
     } else if (mode === 'etirement' || mode === 'gainage') {
-      const min = series.reduce((t, x) => t + (x.reps || 0), 0) / 60;
-      minutesExplicites += min;
-      parExercice[i] += kcal(metExercice(ex), kg, min);
-    } else if (series.length) {
-      muscu.push({ i, ex, nb: series.length });
+      parExercice[i] += kcal(metExercice(ex), kg, series.reduce((t, x) => t + (x.reps || 0), 0) / 60);
+    } else {
+      series.forEach((x) => (parExercice[i] += kcalSerie(ex, x, kg)));
     }
   });
 
-  // 2. Le reste du temps est réparti entre les exercices de muscu selon le nombre de séries.
-  const reste = Math.max(0, duree - minutesExplicites);
-  const nbSeries = muscu.reduce((t, m) => t + m.nb, 0);
-  let autre = 0;
-  if (nbSeries) {
-    muscu.forEach((m) => (parExercice[m.i] += kcal(metExercice(m.ex), kg, (reste * m.nb) / nbSeries)));
-  } else if (reste > 0) {
-    autre = kcal(metGeneral(seance.types), kg, reste);
-  }
+  // Visite sans détail des séries : estimation d'après la durée.
+  const autre = !nbSeries && parTemps ? kcal(metGeneral(seance.types), kg, Math.max(0, seance.duree || 0)) : 0;
 
   const total = parExercice.reduce((t, x) => t + x, 0) + autre;
   return { total, parExercice, poids: kg, estime };

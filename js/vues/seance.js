@@ -483,10 +483,9 @@ function afficherEnCours(el) {
   return () => clearInterval(minuteur);
 }
 
-/** Calories depuis le début de la séance en cours (séries validées + temps écoulé). */
+/** Calories de la séance en cours : uniquement les séries validées (le temps qui passe ne compte pas). */
 function kcalEnDirect() {
-  const s = etat.enCours;
-  return caloriesSeance({ ...s, duree: (Date.now() - s.debutTs) / 60000 }).total;
+  return caloriesSeance(etat.enCours, { parTemps: false }).total;
 }
 
 function carteEnCours(e, i, n) {

@@ -141,3 +141,36 @@ export function graphe(points, { unite = '', hauteur = 180 } = {}) {
 export function vibrer(ms = 200) {
   try { navigator.vibrate?.(ms); } catch { /* rien */ }
 }
+
+// ---------- iPhone : barres du bas qui remontent au milieu de l'écran ----------
+// Si le clavier est ouvert quand on quitte l'app (ou qu'il se ferme mal), iOS peut garder une hauteur
+// d'écran fausse au retour : tout ce qui est fixé en bas (onglets, repos) se retrouve au milieu.
+// 1. On ferme le clavier avant que l'app passe en arrière-plan.
+// 2. Au retour, et quand le clavier se ferme, on force iOS à recalculer la hauteur de l'écran.
+const estChampTexte = (el) => !!el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName);
+
+export function recalerAffichage() {
+  if (estChampTexte(document.activeElement)) return; // clavier ouvert : rien à recaler
+  const racine = document.documentElement;
+  const y = window.scrollY;
+  const hauteur = window.visualViewport?.height || window.innerHeight;
+  racine.style.height = `${Math.round(hauteur)}px`;
+  void racine.offsetHeight; // force le recalcul de la mise en page
+  racine.style.height = '';
+  window.scrollTo(window.scrollX, y + 1);
+  window.scrollTo(window.scrollX, y);
+  document.body.classList.toggle('recale');
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    if (estChampTexte(document.activeElement)) document.activeElement.blur();
+  } else {
+    setTimeout(recalerAffichage, 80);
+    setTimeout(recalerAffichage, 400);
+  }
+});
+window.addEventListener('pageshow', () => setTimeout(recalerAffichage, 80));
+window.addEventListener('focus', () => setTimeout(recalerAffichage, 80));
+document.addEventListener('focusout', () => setTimeout(recalerAffichage, 120));
+window.visualViewport?.addEventListener('resize', () => setTimeout(recalerAffichage, 60));
