@@ -1,9 +1,9 @@
 // Service worker : l'app fonctionne hors ligne, les photos d'exercices déjà vues restent en cache.
-const VERSION = 'muscu-v20';
+const VERSION = 'muscu-v21';
 const IMAGES = 'muscu-images-v1';
 const COQUILLE = [
   './', './index.html', './css/app.css', './manifest.webmanifest', './data/exercices.json',
-  './js/main.js', './js/nav.js', './js/store.js', './js/xp.js', './js/exercices.js', './js/salles.js', './js/ui.js', './js/calories.js', './js/nutrition.js', './js/recettes.js', './js/recettes-2.js', './js/recettes-3.js', './js/objectifs.js', './js/validation.js', './js/prestige.js',
+  './js/main.js', './js/nav.js', './js/store.js', './js/xp.js', './js/exercices.js', './js/salles.js', './js/ui.js', './js/calories.js', './js/nutrition.js', './js/recettes.js', './js/recettes-2.js', './js/recettes-3.js', './js/objectifs.js', './js/validation.js', './js/prestige.js', './js/notifications.js',
   './js/vues/accueil.js', './js/vues/calendrier.js', './js/vues/seance.js', './js/vues/bibliotheque.js',
   './js/vues/progres.js', './js/vues/salles.js', './js/vues/recompenses.js', './js/vues/objectifs.js', './js/vues/nutrition.js', './js/vues/bienvenue.js', './js/vues/categories.js',
   './icons/apple-touch-icon.png', './icons/icon-192.png', './icons/icon-512.png',
@@ -53,4 +53,23 @@ self.addEventListener('fetch', (e) => {
     );
   }
   // Le reste (recherche de salles) passe directement par le réseau.
+});
+
+// ---------- Notifications de fin de repos (envoyées par le serveur, voir notifications/) ----------
+self.addEventListener('push', (e) => {
+  let m = { titre: '⏱️ Repos terminé', texte: 'Série suivante 💪', tag: 'muscu-repos' };
+  try { m = { ...m, ...e.data.json() }; } catch { /* message par défaut */ }
+  e.waitUntil(self.registration.showNotification(m.titre, {
+    body: m.texte, tag: m.tag, renotify: true, requireInteraction: false,
+    icon: './icons/icon-192.png', badge: './icons/icon-192.png', vibrate: [250, 120, 250], data: { url: './#/seance' },
+  }));
+});
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const cible = new URL(e.notification.data?.url || './#/seance', self.registration.scope).href;
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((fenetres) => {
+    const f = fenetres.find((c) => c.url.startsWith(self.registration.scope));
+    return f ? f.focus().then((x) => x?.navigate?.(cible) ?? x) : self.clients.openWindow(cible);
+  }));
 });

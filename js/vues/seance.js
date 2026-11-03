@@ -9,6 +9,8 @@ import { verifierCharges } from '../objectifs.js';
 import { ICONES, ouvrirFeuille, confirmer, toast, vibrer, pousserCouche } from '../ui.js';
 import { choisirExercice } from './bibliotheque.js';
 import { htmlChoixCategories, brancherChoixCategories } from './categories.js';
+import { programmerRepos, annulerRepos, notifActives, notifPossibles, activerNotifications, desactiverNotifications } from '../notifications.js';
+import { estIOS, estInstallee } from '../ui.js';
 import { celebrer } from './recompenses.js';
 
 // Brouillon de séance (avant de démarrer), gardé tant que l'app est ouverte.
@@ -429,7 +431,7 @@ function afficherEnCours(el) {
     const [i, j] = b.dataset.coche.split(':').map(Number);
     let faite;
     maj((e) => { const x = e.enCours.exercices[i].series[j]; x.faite = !x.faite; faite = x.faite; });
-    if (faite && etat.reglages.reposAuto !== false) lancerRepos(etat.reglages.repos || 90);
+    if (faite && etat.reglages.reposAuto !== false) lancerRepos(etat.reglages.repos || 90, exerciceSuivant(i));
   }));
   el.querySelectorAll('[data-fini]').forEach((b) => (b.onclick = () => {
     const i = +b.dataset.fini;
@@ -667,10 +669,19 @@ function bip() {
 }
 
 /** Compte à rebours de repos. */
-function lancerRepos(secondes) {
+function lancerRepos(secondes, exercice = '') {
   debloquerAudio();
-  maj((e) => { if (e.enCours) e.enCours.repos = { mode: 'decompte', fin: Date.now() + secondes * 1000, total: secondes }; }, { silencieux: true });
+  const fin = Date.now() + secondes * 1000;
+  maj((e) => { if (e.enCours) e.enCours.repos = { mode: 'decompte', fin, total: secondes, exercice }; }, { silencieux: true });
   afficherRepos();
+  programmerRepos(fin, exercice); // notification même si l'app est fermée (si activée et réseau dispo)
+}
+
+/** Nom de l'exercice à faire après le repos (celui de la série validée, ou le suivant s'il est fini). */
+function exerciceSuivant(i) {
+  const l = etat.enCours?.exercices || [];
+  const e = l[i]?.series.some((x) => !x.faite) ? l[i] : l.slice(i + 1).find((x) => !x.fini && x.series.some((y) => !y.faite));
+  return e ? exo(e.exId)?.n || '' : '';
 }
 
 /** Chronomètre libre (compte à l'endroit). */
@@ -722,7 +733,7 @@ function dessinerRepos(complet = false) {
     bip();
     vibrer([200, 100, 200]);
     toast('Repos terminé, série suivante 💪');
-    arreterRepos();
+    arreterRepos({ annuler: false });
   }
 }
 
@@ -739,6 +750,8 @@ function brancherBoutons() {
         r.total = Math.max(r.total, Math.round((r.fin - Date.now()) / 1000));
       }
     }, { silencieux: true });
+    const r = etat.enCours?.repos;
+    if (r?.mode === 'decompte' && a !== 'zero') programmerRepos(r.fin, r.exercice || '');
     dessinerRepos();
   }));
 }
@@ -751,9 +764,12 @@ function masquerRepos() {
   document.body.classList.remove('avec-repos');
 }
 
-function arreterRepos() {
+function arreterRepos({ annuler = true } = {}) {
   masquerRepos();
-  if (etat.enCours?.repos) maj((e) => { delete e.enCours.repos; }, { silencieux: true });
+  const r = etat.enCours?.repos;
+  if (r) maj((e) => { delete e.enCours.repos; }, { silencieux: true });
+  // Arrêt avant la fin (« OK ») : on annule la notification programmée.
+  if (annuler && r?.mode === 'decompte' && r.fin > Date.now() + 1500) annulerRepos();
 }
 
 /** Feuille pour lancer le repos à la main ou le chronomètre. */
@@ -768,7 +784,8 @@ function choisirRepos() {
       <label class="ligne carte" style="margin-top:14px;cursor:pointer">
         <input type="checkbox" id="auto" ${auto ? 'checked' : ''} style="width:22px;height:22px;accent-color:var(--accent)">
         <span class="flex1">Lancer le repos automatiquement quand je valide une série</span>
-      </label>`;
+      </label>
+      ${blocNotifications()}`;
     el.querySelectorAll('[data-d]').forEach((b) => (b.onclick = () => {
       const d = +b.dataset.d;
       maj((e) => (e.reglages.repos = d), { silencieux: true });
@@ -777,7 +794,46 @@ function choisirRepos() {
     }));
     el.querySelector('#chrono-libre').onclick = () => { fermer(); lancerChrono(); };
     el.querySelector('#auto').onchange = (ev) => maj((e) => (e.reglages.reposAuto = ev.target.checked), { silencieux: true });
+    brancherNotifications(el, () => { fermer(); choisirRepos(); });
   });
+}
+
+/** Réglage « notification à la fin du repos » (partagé avec la page Réglages). */
+export function blocNotifications() {
+  if (!notifPossibles()) {
+    return `<div class="carte" style="margin-top:10px"><strong>🔔 Notification de fin de repos</strong>
+      <div class="discret">${estIOS && !estInstallee() ? 'Installe d’abord l’app sur l’écran d’accueil (Safari › Partager › Sur l’écran d’accueil), puis ouvre-la depuis son icône.' : 'Ce téléphone ou ce navigateur ne permet pas les notifications d’une app web.'}</div></div>`;
+  }
+  const actives = notifActives();
+  return `<div class="carte" style="margin-top:10px">
+    <div class="ligne"><div style="font-size:24px">🔔</div>
+      <div class="flex1"><div style="font-weight:750">Notification de fin de repos</div>
+      <div class="discret">${actives ? 'Activée : tu es prévenu même app fermée ou écran verrouillé (il faut du réseau).' : 'Sois prévenu à la fin du repos, même app fermée ou écran verrouillé.'}</div></div></div>
+    <div class="ligne" style="margin-top:10px">
+      ${actives
+        ? '<button class="btn btn-petit flex1" data-notif="test">Tester (5 s)</button><button class="btn btn-petit" data-notif="off">Désactiver</button>'
+        : '<button class="btn btn-principal btn-plein" data-notif="on">Activer les notifications</button>'}
+    </div>
+  </div>`;
+}
+
+export function brancherNotifications(el, apres) {
+  el.querySelectorAll('[data-notif]').forEach((b) => (b.onclick = async () => {
+    const a = b.dataset.notif;
+    if (a === 'off') { desactiverNotifications(); toast('Notifications désactivées'); return apres(); }
+    if (a === 'test') {
+      const { testerNotification } = await import('../notifications.js');
+      await testerNotification();
+      return toast('Notification de test dans 5 s : verrouille l’écran pour voir 🔒');
+    }
+    try {
+      await activerNotifications();
+      toast('Notifications activées 🔔');
+    } catch (e) {
+      toast(e.message === 'refuse' ? 'Autorisation refusée : réactive-la dans Réglages › Notifications › Muscu' : 'Impossible d’activer les notifications ici');
+    }
+    apres();
+  }));
 }
 
 // =====================================================================

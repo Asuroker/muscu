@@ -10,6 +10,7 @@ import { celebrer } from './recompenses.js';
 import { totalCalories } from '../calories.js';
 import { verifierPoids } from '../objectifs.js';
 import { carteObjectifPoids } from './objectifs.js';
+import { blocNotifications, brancherNotifications } from './seance.js';
 
 export function afficher(el) {
   entete('Progrès');
@@ -220,6 +221,8 @@ export function afficherReglages(el) {
       <span class="flex1">Lancer le repos automatiquement quand je valide une série</span>
     </label>
 
+    ${blocNotifications()}
+
     <h2>Sauvegarde</h2>
     <p class="discret">Tes données restent sur ce téléphone. Exporte-les dans <strong>${lieuSauvegarde()}</strong> pour ne rien perdre si l’app est supprimée ou si tu changes de téléphone. L’accueil te le rappelle tous les 7 jours.</p>
     <p class="${joursDepuisSauvegarde() === null || joursDepuisSauvegarde() >= 7 ? 'statut-ferme' : 'statut-ouvert'}" style="font-size:14px">${texteDerniereSauvegarde()}</p>
@@ -239,6 +242,7 @@ export function afficherReglages(el) {
   el.querySelectorAll('[data-repos]').forEach((b) => (b.onclick = () => maj((e) => (e.reglages.repos = +b.dataset.repos))));
   el.querySelector('#repos-auto').onchange = (ev) => maj((e) => (e.reglages.reposAuto = ev.target.checked), { silencieux: true });
   el.querySelector('#exporter').onclick = exporter;
+  brancherNotifications(el, () => afficherReglages(el));
   const inst = el.querySelector('#installer');
   if (inst) inst.onclick = async () => { if (await installer()) toast('App installée 🎉'); afficherReglages(el); };
   el.querySelector('#importer').onchange = async (e) => {
