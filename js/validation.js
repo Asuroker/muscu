@@ -54,6 +54,7 @@ function seance(v) {
     salleId: id(s.salleId), types: tableau(s.types).map(id).filter(Boolean).slice(0, 20),
     exercices: tableau(s.exercices).map(exerciceSeance).filter(Boolean).slice(0, 60),
     xp: nombre(s.xp, 0, 100000), note: texte(s.note, 2000), source: texte(s.source, 20),
+    ...(objet(s.marche) ? { marche: { pas: Math.round(nombre(s.marche.pas, 0, 200000)), km: nombre(s.marche.km, 0, 200), source: s.marche.source === 'sante' ? 'sante' : 'manuel' } } : {}),
   };
 }
 

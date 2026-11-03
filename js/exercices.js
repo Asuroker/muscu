@@ -55,12 +55,13 @@ export const GROUPES = [
   { id: 'abducteurs', nom: 'Abducteurs', emoji: '↕️', parent: 'jambes', muscles: ['abductors'] },
 
   { id: 'cou', nom: 'Cou', emoji: '🦒', muscles: ['neck'] },
+  { id: 'marche', nom: 'Marche', emoji: '🚶', cache: true, categorie: 'marche' },
 ];
 
-export const ZONES = GROUPES.filter((g) => g.zone);
+export const ZONES = GROUPES.filter((g) => g.zone && !g.cache);
 export const enfantsDe = (zoneId) => GROUPES.filter((g) => g.parent === zoneId);
 /** Muscles précis sans zone (affichés dans « Autres »). */
-export const MUSCLES_SEULS = GROUPES.filter((g) => !g.zone && !g.parent);
+export const MUSCLES_SEULS = GROUPES.filter((g) => !g.zone && !g.parent && !g.cache);
 
 /** Catégorie la plus précise d'un exercice (muscle) : Triceps, Grand dorsal, Pecs, Cardio… */
 export function categorieMuscle(ex) {

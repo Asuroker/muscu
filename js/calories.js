@@ -101,6 +101,7 @@ export function kcalSerie(ex, serie, poidsCorps) {
  */
 export function caloriesSeance(seance, { seuleValidees = true, parTemps = true } = {}) {
   const { kg, estime } = poidsA(seance.date);
+  if (seance.marche) return { total: kcalMarche(seance, kg), parExercice: [], poids: kg, estime };
   const exercices = seance.exercices || [];
   const parExercice = exercices.map(() => 0);
   let nbSeries = 0;
@@ -124,6 +125,16 @@ export function caloriesSeance(seance, { seuleValidees = true, parTemps = true }
 
   const total = parExercice.reduce((t, x) => t + x, 0) + autre;
   return { total, parExercice, poids: kg, estime };
+}
+
+/** Marche dehors : intensité selon la vitesse (distance / durée), 5 km/h si la durée est inconnue. */
+function kcalMarche(s, kg) {
+  const km = s.marche.km || 0;
+  const minutes = s.duree || (s.marche.pas ? s.marche.pas / 100 : 0);
+  if (!minutes) return 0;
+  const vitesse = km ? km / (minutes / 60) : 5;
+  const met = vitesse > 7.5 ? selonVitesse(COURSE, Math.min(vitesse, 20)) : selonVitesse(MARCHE, vitesse);
+  return kcal(met, kg, minutes);
 }
 
 export const totalCalories = (seances) => seances.reduce((t, s) => t + caloriesSeance(s).total, 0);

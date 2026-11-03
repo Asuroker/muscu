@@ -8,6 +8,7 @@ import { ICONES, lieuSauvegarde, installationPossible, installer, estInstallee }
 import { totalCalories } from '../calories.js';
 import { ajouterPoids, exporter, joursDepuisSauvegarde } from './progres.js';
 import { ajouterSeanceManuelle } from './calendrier.js';
+import { ajouterMarche } from './marche.js';
 import { carteObjectifPoids } from './objectifs.js';
 import { demarrerModele, quand } from './seance.js';
 import { besoins, OBJECTIFS_NUTRI, RECETTES, TYPES_REPAS, imageRecette } from '../nutrition.js';
@@ -78,7 +79,10 @@ export function afficher(el) {
       ${etat.enCours
         ? `<button class="btn btn-principal btn-plein" data-aller="seance">${ICONES.haltere} Reprendre la séance en cours</button>`
         : `<button class="btn btn-principal btn-plein" data-aller="seance">${ICONES.haltere} Commencer une séance</button>
-           <button class="btn btn-plein" id="visite">${ICONES.plus} Noter une visite à la salle</button>`}
+           <div class="grille-2">
+             <button class="btn" id="visite">${ICONES.plus} Visite à la salle</button>
+             <button class="btn" id="marche">🚶 Marche dehors</button>
+           </div>`}
     </div>
 
     <h2>Cette semaine</h2>
@@ -170,6 +174,8 @@ export function afficher(el) {
   }
   const v = el.querySelector('#visite');
   if (v) v.onclick = () => ajouterSeanceManuelle(jour());
+  const m = el.querySelector('#marche');
+  if (m) m.onclick = () => ajouterMarche(jour());
 }
 
 /** Proposition d'installation (Chrome / Android), masquée 7 jours après « Plus tard ». */
