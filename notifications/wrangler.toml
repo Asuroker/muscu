@@ -1,0 +1,15 @@
+name = "muscu-notif"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+VAPID_PUBLIQUE = "BO0nxe1xzjuiFhgaCPFiWkEB9xOYxTo6rVJhZqwlAxd-eytldt4rd06jouQUSF-QAJI8onYiv6NV8QuEAjOQyks"
+VAPID_SUJET = "https://asuroker.github.io/muscu/"
+
+[[durable_objects.bindings]]
+name = "RAPPELS"
+class_name = "RappelRepos"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["RappelRepos"]
