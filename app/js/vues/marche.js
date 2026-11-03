@@ -136,16 +136,20 @@ function aideRaccourci() {
   if (!estIOS) {
     return `<p class="discret" style="margin-top:8px">L’app Santé d’Apple n’existe que sur iPhone. Sur Android, recopie le nombre de pas affiché par ton appli de pas (Google Fit, Samsung Health…).</p>`;
   }
-  return `<p class="discret" style="margin-top:8px">Une app web ne peut pas lire Santé directement. Un <strong>Raccourci</strong> (app Raccourcis d’Apple) peut copier tes pas du jour, puis « Coller depuis Santé » les récupère ici. À créer une seule fois :</p>
+  // Noms des actions en français, avec l'anglais entre parenthèses (iPhone réglé en anglais).
+  const en = (t) => ` <span class="tres-discret">(${t})</span>`;
+  return `<p class="discret" style="margin-top:8px">Une app web ne peut pas lire Santé directement. Un <strong>Raccourci</strong> (app Raccourcis${en('Shortcuts')}) peut copier tes pas du jour, puis « Coller depuis Santé » les récupère ici. À créer une seule fois :</p>
     <ol class="etapes" style="margin-top:8px">
-      <li>Ouvre l’app <strong>Raccourcis</strong>, touche <strong>+</strong>, nomme le raccourci « Pas pour Muscu ».</li>
-      <li>Ajoute l’action <strong>Rechercher des échantillons de santé</strong> : type <strong>Nombre de pas</strong>, date de début <strong>est aujourd’hui</strong>.</li>
-      <li>Ajoute <strong>Calculer les statistiques</strong> : <strong>Somme</strong>.</li>
-      <li>Refais ces 2 actions pour <strong>Distance de marche + course</strong> (Somme).</li>
-      <li>Ajoute l’action <strong>Texte</strong> et écris <code>MUSCU;pas=</code> puis la 1re somme, <code>;km=</code> puis la 2e somme.</li>
-      <li>Ajoute <strong>Copier dans le presse-papiers</strong>.</li>
+      <li>Ouvre l’app <strong>Raccourcis</strong>${en('Shortcuts')}, touche <strong>+</strong>, nomme le raccourci « Pas pour Muscu ».</li>
+      <li>Ajoute <strong>Rechercher des échantillons de santé</strong>${en('Find Health Samples')} : type <strong>Nombre de pas</strong>${en('Steps')}, filtre <strong>Date de début · est aujourd’hui</strong>${en('Start Date · is today')}, <strong>Regrouper par · Jour</strong>${en('Group By · Day')}.</li>
+      <li>Ajoute <strong>Calculer les statistiques</strong>${en('Calculate Statistics')} : <strong>Somme</strong>${en('Sum')}.</li>
+      <li>Ajoute <strong>Définir la variable</strong>${en('Set Variable')} : nom <strong>Pas</strong>, valeur <strong>Statistiques</strong>${en('Statistics')}.</li>
+      <li>Refais les étapes 2 à 4 avec le type <strong>Distance de marche + course</strong>${en('Walking + Running Distance')} et une variable nommée <strong>Distance</strong>.</li>
+      <li>Ajoute <strong>Texte</strong>${en('Text')} : <code>MUSCU;pas=</code> puis la variable <strong>Pas</strong>, <code>;km=</code> puis la variable <strong>Distance</strong>.</li>
+      <li>Ajoute <strong>Copier dans le presse-papiers</strong>${en('Copy to Clipboard')}.</li>
     </ol>
-    <p class="tres-discret" style="margin:0">Après ta marche : lance le raccourci (ou dis « Dis Siri, pas pour Muscu »), puis ici « Coller depuis Santé ». iOS te demande d’autoriser le collage : touche « Autoriser ».</p>`;
+    <p class="tres-discret" style="margin:0 0 6px">Après ta marche : lance le raccourci (ou « Dis Siri, pas pour Muscu »${en('Hey Siri')}), puis ici « Coller depuis Santé » et touche <strong>Autoriser le collage</strong>${en('Allow Paste')}.</p>
+    <p class="tres-discret" style="margin:0">Si les pas sont doublés (iPhone + Apple Watch), ajoute aux 2 recherches un filtre <strong>Source</strong> sur un seul appareil. La distance doit être en km : app Santé › Parcourir › Activité › Distance › Unité${en('Health › Browse › Activity › Unit')}.</p>`;
 }
 
 /** Résumé d'une marche pour les listes : « 8 423 pas · 6,1 km ». */
