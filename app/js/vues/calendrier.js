@@ -5,7 +5,7 @@ import { calculerXpSeance, ajouterXp } from '../xp.js';
 import { caloriesSeance, totalCalories, fmtKcal } from '../calories.js';
 import { ICONES, ouvrirFeuille, confirmer, toast } from '../ui.js';
 import { celebrer } from './recompenses.js';
-import { demarrerModele, planifierPour } from './seance.js';
+import { demarrerModele, planifierPour, refaireSeance } from './seance.js';
 import { htmlChoixCategories, brancherChoixCategories } from './categories.js';
 import { ajouterMarche, texteMarche } from './marche.js';
 
@@ -141,10 +141,19 @@ export function afficherSeance(el, [id]) {
       ? 'Calories estimées pour 75 kg : <a href="#/poids" style="color:var(--accent)">ajoute ta pesée</a> pour un calcul précis.'
       : `Calories estimées pour ${String(kcal.poids).replace('.', ',')} kg, d’après ${s.marche ? 'ta distance et ta durée' : 'tes séries, charges et exercices'}.`}</p>
     ${(s.exercices || []).length ? `<h2>Exercices</h2>${s.exercices.map((e, i) => carteExercice(e, kcal.parExercice[i])).join('')}` : ''}
+    ${!s.marche && (s.exercices || []).length ? `<div class="grille-2" style="margin-top:14px">
+      <button class="btn" id="refaire">🔁 Refaire cette séance</button>
+      <button class="btn" id="garder">💾 Enregistrer pour la réutiliser</button>
+    </div>` : ''}
     <button class="btn btn-plein btn-danger" id="suppr" style="margin-top:20px">${ICONES.poubelle} Supprimer la séance</button>
   `;
   el.querySelectorAll('[data-aller]').forEach((b) => (b.onclick = () => aller(b.dataset.aller)));
   document.getElementById('modif').onclick = () => (s.marche ? ajouterMarche(s.date, s) : ajouterSeanceManuelle(s.date, s));
+  const refaire = el.querySelector('#refaire');
+  if (refaire) {
+    refaire.onclick = () => refaireSeance(s);
+    el.querySelector('#garder').onclick = () => refaireSeance(s, { garder: true });
+  }
   el.querySelector('#suppr').onclick = async () => {
     if (!(await confirmer('Supprimer cette séance ? L’XP gagnée avec elle sera retirée.', { ok: 'Supprimer', danger: true }))) return;
     maj((e) => {

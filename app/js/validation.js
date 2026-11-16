@@ -118,6 +118,7 @@ export function assainir(brut, base) {
     id: m.id, nom: texte(m.nom, 60) || 'Ma séance', date: jour(m.date), creeLe: dateIso(m.creeLe) || new Date().toISOString(),
     types: tableau(m.types).map(id).filter(Boolean).slice(0, 20), dureeVisee: nombre(m.dureeVisee, 0, 600, 60),
     exercices: tableau(m.exercices).map(exerciceSeance).filter(Boolean).slice(0, 60),
+    ...(m.unique === true && jour(m.date) ? { unique: true } : {}),
   })).slice(0, 100);
   const reg = objet(d.reglages) || {};
   const sch = objet(reg.schema);

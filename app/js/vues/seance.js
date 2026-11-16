@@ -319,6 +319,72 @@ function enregistrerModele(el) {
   });
 }
 
+/** Exercices d'une séance faite, prêts à refaire : séries validées (ou toutes), charges reprises au démarrage. */
+function exercicesARefaire(s) {
+  return (s.exercices || []).filter((x) => exo(x.exId)).map((x) => {
+    const faites = x.series.filter((y) => y.faite);
+    return { exId: x.exId, series: (faites.length ? faites : x.series).map((y) => ({ reps: y.reps, kg: 0, faite: false })) };
+  }).filter((x) => x.series.length);
+}
+
+const nomDepuis = (s) => ((s.types || []).filter((t) => t !== 'marche').map(nomGroupe).join(' · ') || 'Ma séance').slice(0, 60);
+
+/**
+ * Refaire une séance passée : la prévoir un autre jour (copie unique, retirée une fois démarrée)
+ * ou la relancer tout de suite. Avec { garder: true } : l'enregistrer dans « Mes séances » pour la réutiliser.
+ */
+export function refaireSeance(s, { garder = false } = {}) {
+  const exercices = exercicesARefaire(s);
+  if (!exercices.length) return toast('Aucun exercice à reprendre dans cette séance');
+  const demain = new Date(); demain.setDate(demain.getDate() + 1);
+  const liste = `<p class="discret">${exercices.map((x) => `${esc(exo(x.exId).n)} <span class="tres-discret">(${x.series.length}×)</span>`).join(' · ')}</p>`;
+  const creer = ({ nom, date, unique }) => {
+    const m = { id: uid(), creeLe: new Date().toISOString(), nom, date, types: (s.types || []).filter((t) => t !== 'marche'), dureeVisee: s.dureeVisee || s.duree || 60, exercices, ...(unique ? { unique: true } : {}) };
+    maj((e) => { e.modeles = e.modeles || []; e.modeles.push(m); }, { silencieux: true });
+    return m;
+  };
+
+  ouvrirFeuille((f, fermer) => {
+    if (garder) {
+      f.innerHTML = `<h2>💾 Enregistrer pour la réutiliser</h2>${liste}
+        <div class="pile">
+          <label class="champ">Nom<input type="text" id="r-nom" maxlength="60" value="${esc(nomDepuis(s))}"></label>
+          <p class="tres-discret" style="margin:0">Elle sera dans « Mes séances enregistrées » (onglet Séance), prête à démarrer quand tu veux. Les charges seront reprises de ta dernière fois.</p>
+          <button class="btn btn-principal btn-plein" id="r-ok">💾 Enregistrer</button>
+        </div>`;
+      f.querySelector('#r-ok').onclick = () => {
+        creer({ nom: f.querySelector('#r-nom').value.trim() || nomDepuis(s), date: null });
+        fermer();
+        toast('Séance enregistrée 💾');
+      };
+      return;
+    }
+    f.innerHTML = `<h2>🔁 Refaire cette séance</h2>${liste}
+      <div class="pile">
+        <label class="champ">Jour<input type="date" id="r-date" min="${jour()}" value="${jour(demain)}"></label>
+        <button class="btn btn-principal btn-plein" id="r-prevoir">📅 La prévoir ce jour-là</button>
+        ${etat.enCours ? '' : '<button class="btn btn-plein" id="r-go">▶ La refaire maintenant</button>'}
+        <p class="tres-discret" style="margin:0">Mêmes exercices, mêmes séries et répétitions. Les charges seront reprises de ta dernière fois.</p>
+      </div>`;
+    f.querySelector('#r-prevoir').onclick = () => {
+      const date = f.querySelector('#r-date').value;
+      if (!date || date < jour()) return toast('Choisis un jour à venir');
+      creer({ nom: nomDepuis(s), date, unique: true });
+      fermer();
+      toast(`Séance prévue ${quand(date)} 📅`);
+    };
+    const go = f.querySelector('#r-go');
+    if (go) go.onclick = () => {
+      fermer();
+      brouillon.types = new Set((s.types || []).filter((t) => t !== 'marche'));
+      brouillon.minutes = s.dureeVisee || s.duree || 60;
+      brouillon.salleId = s.salleId ?? undefined;
+      demarrer(exercices.map((x) => ({ ...x, series: x.series.map((y) => ({ ...y })) })));
+      aller('seance');
+    };
+  });
+}
+
 function menuModele(id, el) {
   const m = modele(id);
   if (!m) return;
@@ -332,7 +398,12 @@ function menuModele(id, el) {
         <button class="btn btn-plein btn-danger" data-m="suppr">${ICONES.poubelle} Supprimer</button>
       </div>`;
     f.querySelector('#m-date2').onchange = (ev) => {
-      maj((e) => { const x = e.modeles.find((y) => y.id === id); if (x) x.date = ev.target.value || null; }, { silencieux: true });
+      maj((e) => {
+        const x = e.modeles.find((y) => y.id === id);
+        if (!x) return;
+        x.date = ev.target.value || null;
+        if (!x.date) delete x.unique; // sans date, la copie devient une séance enregistrée comme les autres
+      }, { silencieux: true });
       toast(ev.target.value ? `Prévue ${quand(ev.target.value)} 📅` : 'Date retirée');
       afficherPreparation(el);
     };
@@ -365,8 +436,10 @@ export function demarrerModele(id) {
   brouillon.types = new Set(m.types);
   brouillon.minutes = m.dureeVisee || 60;
   const exercices = m.exercices.filter((x) => exo(x.exId)).map((x) => ({ exId: x.exId, series: x.series.map((y) => ({ ...y })) }));
-  // Une séance prévue aujourd'hui (ou en retard) est considérée comme faite : on retire sa date.
-  if (m.date && m.date <= jour()) maj((e) => (e.modeles.find((x) => x.id === id).date = null), { silencieux: true });
+  // Une séance prévue aujourd'hui (ou en retard) est considérée comme faite : on retire sa date
+  // (et une copie unique, créée avec « Refaire cette séance », disparaît).
+  if (m.unique) maj((e) => (e.modeles = e.modeles.filter((x) => x.id !== id)), { silencieux: true });
+  else if (m.date && m.date <= jour()) maj((e) => (e.modeles.find((x) => x.id === id).date = null), { silencieux: true });
   demarrer(exercices);
   aller('seance');
 }
